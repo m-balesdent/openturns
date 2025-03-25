@@ -7,11 +7,6 @@ nearestPointAlgorithm : :class:`~openturns.OptimizationAlgorithm`
     Optimization algorithm used to search the design point.
 event : :class:`~openturns.RandomVector`
     Failure event.
-physicalStartingPoint : sequence of float
-    Starting point of the optimization algorithm, declared in the physical
-    space (in case of single-start algorithm). In case of multi-start algorithm,
-    the starting points are directly defined in nearestPointAlgorithm in the 
-    Standard Space.
 
 Notes
 -----
@@ -88,14 +83,7 @@ estimate the failure probability, that is if:
 
 where :math:`\vect{x}^*` is the design point, :math:`s` is the threshold and :math:`\epsilon_t`
 is the absolute tolerance.
-Default value is specified in the `nearestPointAlgorithm` attribute.
-Either single-start or multi-start algorithms (see :class:`~openturns.MultiStart`) can be used for the optimization.
-The methods :meth:`getPhysicalStartingPoint` and :meth:`setPhysicalStartingPoint`
-are used only in case of single-start optimization algorithms.
-In case of multi-start optimization algorithms, the starting points are directly defined within the
-optimization strategy (see :class:`~openturns.MultiStart`). In that case, one has to be
-careful to indicate the initial points in the Standard space.
-
+The starting points are directly defined through the used :class:`~openturns.OptimizationAlgorithm`.
 
 See also
 --------
@@ -132,38 +120,6 @@ Returns
 -------
 algorithm : :class:`~openturns.OptimizationAlgorithm`
      Optimization algorithm used to research the design point."
-
-// ---------------------------------------------------------------------
-
-%feature("docstring") OT::Analytical::setNearestPointAlgorithm
-"Accessor to the optimization algorithm used to find the design point.
-
-Parameters
-----------
-algorithm : :class:`~openturns.OptimizationAlgorithm`
-     Optimization algorithm used to research the design point."
-
-// ---------------------------------------------------------------------
-
-%feature("docstring") OT::Analytical::getPhysicalStartingPoint
-"Accessor to the starting point of the optimization algorithm.
-
-Returns
--------
-point : :class:`~openturns.Point`
-    Starting point of the optimization algorithm, declared in the physical
-    space."
-
-// ---------------------------------------------------------------------
-
-%feature("docstring") OT::Analytical::setPhysicalStartingPoint
-"Accessor to the starting point of the optimization algorithm.
-
-Parameters
-----------
-point : sequence of float
-    Starting point of the optimization algorithm, declared in the physical
-    space."
 
 // ---------------------------------------------------------------------
 
