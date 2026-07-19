@@ -25,6 +25,7 @@
 #include "openturns/Normal.hxx"
 #include "openturns/TruncatedNormal.hxx"
 #include "openturns/Uniform.hxx"
+#include "openturns/MultivariateUniform.hxx"
 #include "openturns/FiniteDiscreteDistribution.hxx"
 #include "openturns/PersistentObjectFactory.hxx"
 #include "openturns/ResourceMap.hxx"
@@ -302,6 +303,13 @@ Bool TruncatedDistribution::hasSimplifiedVersion(Distribution & simplified) cons
       }
     }
     simplified = FiniteDiscreteDistribution(reducedSupport, reducedProbabilities);
+    return true;
+  }
+  if (kind == "MultivariateUniform")
+  {
+    // Truncating a MultivariateUniform yields a MultivariateUniform with the truncated bounds
+    const Interval truncatedRange(getRange());
+    simplified = MultivariateUniform(truncatedRange.getLowerBound(), truncatedRange.getUpperBound());
     return true;
   }
   // At this point, no more simplification in the multivariate case
@@ -751,13 +759,16 @@ Distribution TruncatedDistribution::getMarginal(const UnsignedInteger i) const
 /* Get the distribution of the marginal distribution corresponding to indices dimensions */
 Distribution TruncatedDistribution::getMarginal(const Indices & indices) const
 {
+  Distribution marginal;
   if (useSimplifiedVersion_)
-    return simplifiedVersion_.getMarginal(indices);
+    marginal = simplifiedVersion_.getMarginal(indices);
+  else if (distribution_.hasIndependentCopula())
+    marginal = new TruncatedDistribution(distribution_.getMarginal(indices), bounds_.getMarginal(indices));
+  else
+    return DistributionImplementation::getMarginal(indices);
 
-  if (distribution_.hasIndependentCopula())
-    return new TruncatedDistribution(distribution_.getMarginal(indices), bounds_.getMarginal(indices));
-
-  return DistributionImplementation::getMarginal(indices);
+  marginal.setDescription(getDescription().select(indices));
+  return marginal;
 }
 
 /* Realization threshold accessor */
@@ -857,6 +868,14 @@ Point TruncatedDistribution::computeSequentialConditionalPDF(const Point & x) co
   return DistributionImplementation::computeSequentialConditionalPDF(x);
 }
 
+Point TruncatedDistribution::computeSequentialConditionalPDF(const Point & x, const Indices & ordering) const
+{
+  if (useSimplifiedVersion_)
+    return simplifiedVersion_.computeSequentialConditionalPDF(x, ordering);
+
+  return DistributionImplementation::computeSequentialConditionalPDF(x, ordering);
+}
+
 /* Compute the CDF of Xi | X1, ..., Xi-1. x = Xi, y = (X1,...,Xi-1) */
 Scalar TruncatedDistribution::computeConditionalCDF(const Scalar x, const Point & y) const
 {
@@ -874,6 +893,14 @@ Point TruncatedDistribution::computeSequentialConditionalCDF(const Point & x) co
   return DistributionImplementation::computeSequentialConditionalCDF(x);
 }
 
+Point TruncatedDistribution::computeSequentialConditionalCDF(const Point & x, const Indices & ordering) const
+{
+  if (useSimplifiedVersion_)
+    return simplifiedVersion_.computeSequentialConditionalCDF(x, ordering);
+
+  return DistributionImplementation::computeSequentialConditionalCDF(x, ordering);
+}
+
 Scalar TruncatedDistribution::computeConditionalQuantile(const Scalar q, const Point & y) const
 {
   if (useSimplifiedVersion_)
@@ -888,6 +915,14 @@ Point TruncatedDistribution::computeSequentialConditionalQuantile(const Point & 
     return simplifiedVersion_.computeSequentialConditionalQuantile(q);
 
   return DistributionImplementation::computeSequentialConditionalQuantile(q);
+}
+
+Point TruncatedDistribution::computeSequentialConditionalQuantile(const Point & q, const Indices & ordering) const
+{
+  if (useSimplifiedVersion_)
+    return simplifiedVersion_.computeSequentialConditionalQuantile(q, ordering);
+
+  return DistributionImplementation::computeSequentialConditionalQuantile(q, ordering);
 }
 
 /* Get the isoprobabilist transformation */

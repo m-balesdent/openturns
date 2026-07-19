@@ -503,6 +503,10 @@ public:
 
   virtual Point computeSequentialConditionalPDF(const Point & x) const;
 
+  /** Compute the PDF of Xi | X1, ..., Xi-1, with custom variable ordering */
+  virtual Point computeSequentialConditionalPDF(const Point & x,
+      const Indices & ordering) const;
+
   virtual Point computeConditionalPDF(const Point & x,
                                       const Sample & y) const;
 
@@ -512,6 +516,10 @@ public:
 
   virtual Point computeSequentialConditionalCDF(const Point & x) const;
 
+  /** Compute the CDF of Xi | X1, ..., Xi-1, with custom variable ordering */
+  virtual Point computeSequentialConditionalCDF(const Point & x,
+      const Indices & ordering) const;
+
   virtual Point computeConditionalCDF(const Point & x,
                                       const Sample & y) const;
 
@@ -520,6 +528,10 @@ public:
       const Point & y) const;
 
   virtual Point computeSequentialConditionalQuantile(const Point & q) const;
+
+  /** Compute the quantile of Xi | X1, ..., Xi-1, with custom variable ordering */
+  virtual Point computeSequentialConditionalQuantile(const Point & q,
+      const Indices & ordering) const;
 
   virtual Point computeConditionalQuantile(const Point & q,
       const Sample & y) const;

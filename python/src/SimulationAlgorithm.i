@@ -17,7 +17,7 @@ static OT::Bool SimulationAlgorithm_StopCallback(void * data) {
   OT::ScopedPyObjectPointer result(PyObject_CallFunctionObjArgs(pyObj, NULL));
   if (result.isNull())
     OT::handleException();
-  return OT::checkAndConvert< OT::_PyInt_, OT::UnsignedInteger >(result.get());
+  return OT::checkAndConvert< OT::_PyLong_, OT::UnsignedInteger >(result.get());
 }
 
 %}
@@ -27,14 +27,13 @@ static OT::Bool SimulationAlgorithm_StopCallback(void * data) {
 %ignore OT::SimulationAlgorithm::setProgressCallback(ProgressCallback callBack, void * data);
 %ignore OT::SimulationAlgorithm::setStopCallback(StopCallback callBack, void * data);
 
+OTTypedInterfaceObjectHelper(SimulationAlgorithm)
+
 %include openturns/SimulationAlgorithm.hxx
 
 namespace OT {
 
-
 %extend SimulationAlgorithm {
-
-SimulationAlgorithm(const SimulationAlgorithm & other) { return new OT::SimulationAlgorithm(other); }
 
 void setProgressCallback(PyObject * callBack) {
   if (PyCallable_Check(callBack)) {
@@ -56,4 +55,3 @@ void setStopCallback(PyObject * callBack) {
 
 } // SimulationAlgorithm
 } // OT
-

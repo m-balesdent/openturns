@@ -370,6 +370,8 @@ public:
   virtual Scalar computeConditionalPDF(const Scalar x,
                                        const Point & y) const;
   virtual Point computeSequentialConditionalPDF(const Point & x) const;
+  virtual Point computeSequentialConditionalPDF(const Point & x,
+      const Indices & ordering) const;
   virtual Point computeConditionalPDF(const Point & x,
                                       const Sample & y) const;
 
@@ -377,6 +379,8 @@ public:
   virtual Scalar computeConditionalCDF(const Scalar x,
                                        const Point & y) const;
   virtual Point computeSequentialConditionalCDF(const Point & x) const;
+  virtual Point computeSequentialConditionalCDF(const Point & x,
+      const Indices & ordering) const;
   virtual Point computeConditionalCDF(const Point & x,
                                       const Sample & y) const;
 
@@ -384,6 +388,8 @@ public:
   virtual Scalar computeConditionalQuantile(const Scalar q,
       const Point & y) const;
   virtual Point computeSequentialConditionalQuantile(const Point & q) const;
+  virtual Point computeSequentialConditionalQuantile(const Point & q,
+      const Indices & ordering) const;
   virtual Point computeConditionalQuantile(const Point & q,
       const Sample & y) const;
 

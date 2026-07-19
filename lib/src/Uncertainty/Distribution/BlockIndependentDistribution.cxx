@@ -100,22 +100,33 @@ String BlockIndependentDistribution::__str__(const String & ) const
 /* Distribution collection accessor */
 void BlockIndependentDistribution::setDistributionCollection(const DistributionCollection & coll)
 {
+  // unfold BlockIndependentDistribution items
+  DistributionCollection coll2;
+  for (UnsignedInteger i = 0; i < coll.getSize(); ++ i)
+  {
+    BlockIndependentDistribution *p_block = dynamic_cast<BlockIndependentDistribution*>(coll[i].getImplementation().get());
+    if (p_block)
+      coll2.add(p_block->getDistributionCollection());
+    else
+      coll2.add(coll[i]);
+  }
+
   // Check if the collection is not empty
-  const UnsignedInteger size = coll.getSize();
-  if (size == 0) throw InvalidArgumentException(HERE) << "Collection of distributions is empty";
-  distributionCollection_ = coll;
+  const UnsignedInteger size = coll2.getSize();
+  if (size == 0) throw InvalidArgumentException(HERE) << "Collection of distributions is empty"; 
   Description description(0);
   UnsignedInteger dimension = 0;
   // Compute the dimension, build the description and check the independence
   Bool parallel = true;
   for (UnsignedInteger i = 0; i < size; ++i)
   {
-    const UnsignedInteger distributionDimension = coll[i].getDimension();
+    const UnsignedInteger distributionDimension = coll2[i].getDimension();
     dimension += distributionDimension;
-    const Description distributionCollection(coll[i].getDescription());
+    const Description distributionCollection(coll2[i].getDescription());
     for (UnsignedInteger j = 0; j < distributionDimension; ++j) description.add(distributionCollection[j]);
-    parallel = parallel && coll[i].getImplementation()->isParallel();
+    parallel = parallel && coll2[i].getImplementation()->isParallel();
   }
+  distributionCollection_ = coll2;
   setParallel(parallel);
   isAlreadyComputedCovariance_ = false;
   // One MUST set the dimension BEFORE the description, else an error occurs
@@ -393,6 +404,73 @@ Point BlockIndependentDistribution::computeSequentialConditionalPDF(const Point 
   return result;
 }
 
+/* Compute the PDF of Xi | X1, ..., Xi-1, with custom variable ordering */
+Point BlockIndependentDistribution::computeSequentialConditionalPDF(const Point & x, const Indices & ordering) const
+{
+  if (!ordering.check(dimension_)) throw InvalidArgumentException(HERE) << "The ordering must contain distinct values in [0, dim-1]";
+  const UnsignedInteger dim = ordering.getSize();
+  if (x.getDimension() != dim) throw InvalidArgumentException(HERE) << "Error: cannot compute sequential conditional PDF with an argument of dimension=" << x.getDimension() << " different from ordering dimension=" << dim;
+  if (hasIndependentCopula())
+    return computeSequentialConditionalPDF(x);
+  const auto distCollection = distributionCollection_;
+  const UnsignedInteger blockCount = distCollection.getSize();
+
+  // Build cumulative dimensions for each block
+  Indices cumulatedDim(blockCount + 1, 0);
+  for (UnsignedInteger i = 0; i < blockCount; ++i)
+    cumulatedDim[i + 1] = cumulatedDim[i] + distCollection[i].getDimension();
+
+  // Group components by block according to the ordering
+  Collection<Indices> blockLocalIndices(blockCount);
+  Collection<Indices> blockOrderPositions(blockCount);
+  for (UnsignedInteger i = 0; i < dim; ++i)
+  {
+    const UnsignedInteger globalIndex = ordering[i];
+    UnsignedInteger blockIdx = 0;
+    while (globalIndex >= cumulatedDim[blockIdx + 1]) ++blockIdx;
+    blockOrderPositions[blockIdx].add(i);
+    blockLocalIndices[blockIdx].add(globalIndex - cumulatedDim[blockIdx]);
+  }
+
+  // Verify natural order within each block: local positions must be strictly increasing
+  Bool withinBlockNaturalOrder = true;
+  for (UnsignedInteger b = 0; b < blockCount && withinBlockNaturalOrder; ++b)
+  {
+    for (UnsignedInteger j = 1; j < blockLocalIndices[b].getSize(); ++j)
+      if (blockLocalIndices[b][j] <= blockLocalIndices[b][j - 1])
+      {
+        withinBlockNaturalOrder = false;
+        break;
+      }
+  }
+
+  if (withinBlockNaturalOrder)
+  {
+    Point result(dim);
+    for (UnsignedInteger b = 0; b < blockCount; ++b)
+    {
+      const UnsignedInteger n = blockOrderPositions[b].getSize();
+      if (n == 0) continue;
+      // Extract x values for this block's components in the order they appear
+      Point localX(n);
+      for (UnsignedInteger j = 0; j < n; ++j)
+        localX[j] = x[blockOrderPositions[b][j]];
+      // Compute block SCPDF
+      Point localResult;
+      if (n < distCollection[b].getDimension())
+        localResult = distCollection[b].getMarginal(blockLocalIndices[b]).computeSequentialConditionalPDF(localX);
+      else
+        localResult = distCollection[b].computeSequentialConditionalPDF(localX);
+      // Place results at the right positions in the output
+      for (UnsignedInteger j = 0; j < n; ++j)
+        result[blockOrderPositions[b][j]] = localResult[j];
+    }
+    return result;
+  }
+  // Fall back to base class
+  return DistributionImplementation::computeSequentialConditionalPDF(x, ordering);
+}
+
 /* Compute the CDF of Xi | X1, ..., Xi-1. x = Xi, y = (X1,...,Xi-1) */
 Scalar BlockIndependentDistribution::computeConditionalCDF(const Scalar x, const Point & y) const
 {
@@ -434,6 +512,73 @@ Point BlockIndependentDistribution::computeSequentialConditionalCDF(const Point 
     } // i
   } // else
   return result;
+}
+
+/* Compute the CDF of Xi | X1, ..., Xi-1, with custom variable ordering */
+Point BlockIndependentDistribution::computeSequentialConditionalCDF(const Point & x, const Indices & ordering) const
+{
+  if (!ordering.check(dimension_)) throw InvalidArgumentException(HERE) << "The ordering must contain distinct values in [0, dim-1]";
+  const UnsignedInteger dim = ordering.getSize();
+  if (x.getDimension() != dim) throw InvalidArgumentException(HERE) << "Error: cannot compute sequential conditional CDF with an argument of dimension=" << x.getDimension() << " different from ordering dimension=" << dim;
+  if (hasIndependentCopula())
+    return computeSequentialConditionalCDF(x);
+  const auto distCollection = distributionCollection_;
+  const UnsignedInteger blockCount = distCollection.getSize();
+
+  // Build cumulative dimensions for each block
+  Indices cumulatedDim(blockCount + 1, 0);
+  for (UnsignedInteger i = 0; i < blockCount; ++i)
+    cumulatedDim[i + 1] = cumulatedDim[i] + distCollection[i].getDimension();
+
+  // Group components by block according to the ordering
+  Collection<Indices> blockLocalIndices(blockCount);
+  Collection<Indices> blockOrderPositions(blockCount);
+  for (UnsignedInteger i = 0; i < dim; ++i)
+  {
+    const UnsignedInteger globalIndex = ordering[i];
+    UnsignedInteger blockIdx = 0;
+    while (globalIndex >= cumulatedDim[blockIdx + 1]) ++blockIdx;
+    blockOrderPositions[blockIdx].add(i);
+    blockLocalIndices[blockIdx].add(globalIndex - cumulatedDim[blockIdx]);
+  }
+
+  // Verify natural order within each block: local positions must be strictly increasing
+  Bool withinBlockNaturalOrder = true;
+  for (UnsignedInteger b = 0; b < blockCount && withinBlockNaturalOrder; ++b)
+  {
+    for (UnsignedInteger j = 1; j < blockLocalIndices[b].getSize(); ++j)
+      if (blockLocalIndices[b][j] <= blockLocalIndices[b][j - 1])
+      {
+        withinBlockNaturalOrder = false;
+        break;
+      }
+  }
+
+  if (withinBlockNaturalOrder)
+  {
+    Point result(dim);
+    for (UnsignedInteger b = 0; b < blockCount; ++b)
+    {
+      const UnsignedInteger n = blockOrderPositions[b].getSize();
+      if (n == 0) continue;
+      // Extract x values for this block's components in the order they appear
+      Point localX(n);
+      for (UnsignedInteger j = 0; j < n; ++j)
+        localX[j] = x[blockOrderPositions[b][j]];
+      // Compute block SCCDF
+      Point localResult;
+      if (n < distCollection[b].getDimension())
+        localResult = distCollection[b].getMarginal(blockLocalIndices[b]).computeSequentialConditionalCDF(localX);
+      else
+        localResult = distCollection[b].computeSequentialConditionalCDF(localX);
+      // Place results at the right positions in the output
+      for (UnsignedInteger j = 0; j < n; ++j)
+        result[blockOrderPositions[b][j]] = localResult[j];
+    }
+    return result;
+  }
+  // Fall back to base class
+  return DistributionImplementation::computeSequentialConditionalCDF(x, ordering);
 }
 
 /* Compute the quantile of Xi | X1, ..., Xi-1, i.e. x such that CDF(x|y) = q with x = Xi, y = (X1,...,Xi-1) */
@@ -479,6 +624,71 @@ Point BlockIndependentDistribution::computeSequentialConditionalQuantile(const P
     } // i
   } // else
   return result;
+}
+
+Point BlockIndependentDistribution::computeSequentialConditionalQuantile(const Point & q, const Indices & ordering) const
+{
+  if (!ordering.check(dimension_)) throw InvalidArgumentException(HERE) << "The ordering must contain distinct values in [0, dim-1]";
+  const UnsignedInteger dim = ordering.getSize();
+  for (UnsignedInteger i = 0; i < dim; ++i)
+    if (!((q[i] >= 0.0) && (q[i] <= 1.0))) throw InvalidArgumentException(HERE) << "Error: cannot compute a conditional quantile for a probability level q[" << i << "]=" << q[i] << " outside of [0, 1]";
+  if (hasIndependentCopula())
+  {
+    Point result(dim);
+    for (UnsignedInteger i = 0; i < dim; ++i)
+      result[i] = getMarginal(ordering[i]).computeQuantile(q[i])[0];
+    return result;
+  }
+  const auto distCollection = distributionCollection_;
+  const UnsignedInteger blockCount = distCollection.getSize();
+
+  Indices cumulatedDim(blockCount + 1, 0);
+  for (UnsignedInteger i = 0; i < blockCount; ++i)
+    cumulatedDim[i + 1] = cumulatedDim[i] + distCollection[i].getDimension();
+
+  Collection<Indices> blockLocalIndices(blockCount);
+  Collection<Indices> blockOrderPositions(blockCount);
+  for (UnsignedInteger i = 0; i < dim; ++i)
+  {
+    const UnsignedInteger globalIndex = ordering[i];
+    UnsignedInteger blockIdx = 0;
+    while (globalIndex >= cumulatedDim[blockIdx + 1]) ++blockIdx;
+    blockOrderPositions[blockIdx].add(i);
+    blockLocalIndices[blockIdx].add(globalIndex - cumulatedDim[blockIdx]);
+  }
+
+  Bool withinBlockNaturalOrder = true;
+  for (UnsignedInteger b = 0; b < blockCount && withinBlockNaturalOrder; ++b)
+  {
+    for (UnsignedInteger j = 1; j < blockLocalIndices[b].getSize(); ++j)
+      if (blockLocalIndices[b][j] <= blockLocalIndices[b][j - 1])
+      {
+        withinBlockNaturalOrder = false;
+        break;
+      }
+  }
+
+  if (withinBlockNaturalOrder)
+  {
+    Point result(dim);
+    for (UnsignedInteger b = 0; b < blockCount; ++b)
+    {
+      const UnsignedInteger n = blockOrderPositions[b].getSize();
+      if (n == 0) continue;
+      Point localQ(n);
+      for (UnsignedInteger j = 0; j < n; ++j)
+        localQ[j] = q[blockOrderPositions[b][j]];
+      Point localResult;
+      if (n < distCollection[b].getDimension())
+        localResult = distCollection[b].getMarginal(blockLocalIndices[b]).computeSequentialConditionalQuantile(localQ);
+      else
+        localResult = distCollection[b].computeSequentialConditionalQuantile(localQ);
+      for (UnsignedInteger j = 0; j < n; ++j)
+        result[blockOrderPositions[b][j]] = localResult[j];
+    }
+    return result;
+  }
+  return DistributionImplementation::computeSequentialConditionalQuantile(q, ordering);
 }
 
 /* Get the distribution of the marginal distribution corresponding to indices dimensions

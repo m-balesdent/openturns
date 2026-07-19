@@ -56,6 +56,9 @@ public:
     return *this;
   }
 
+  ScopedPyObjectPointer(const ScopedPyObjectPointer&) = delete;
+  ScopedPyObjectPointer& operator=(const ScopedPyObjectPointer&) = delete;
+
   PyObject & operator*() const
   {
     return *pyObj_;
@@ -66,13 +69,67 @@ public:
     return pyObj_;
   }
 
-  bool isNull()
+  bool isNull() const
   {
     return !pyObj_;
   }
 
 private:
   PyObject* pyObj_;
+};
+
+/** InternalException that preserves the original Python exception type/value/traceback
+    so the SWIG handler can reconstruct the original exception (e.g. a custom subclass). */
+class PythonInternalException : public InternalException
+{
+public:
+  PythonInternalException(PyObject * type, PyObject * value, PyObject * traceback)
+    : InternalException(HERE)
+    , type_(type)
+    , value_(value)
+    , traceback_(traceback)
+  {
+    Py_XINCREF(type_);
+    Py_XINCREF(value_);
+    Py_XINCREF(traceback_);
+  }
+
+  PythonInternalException(const PythonInternalException & other)
+    : InternalException(other)
+    , type_(other.type_)
+    , value_(other.value_)
+    , traceback_(other.traceback_)
+  {
+    Py_XINCREF(type_);
+    Py_XINCREF(value_);
+    Py_XINCREF(traceback_);
+  }
+
+  ~PythonInternalException() noexcept
+  {
+    Py_XDECREF(type_);
+    Py_XDECREF(value_);
+    Py_XDECREF(traceback_);
+  }
+
+  void restore() const
+  {
+#if PY_VERSION_HEX >= 0x030c0000
+    if (traceback_)
+      PyException_SetTraceback(value_, traceback_);
+    PyErr_SetObject(type_, value_);
+#else
+    Py_INCREF(type_);
+    Py_INCREF(value_);
+    Py_XINCREF(traceback_);
+    PyErr_Restore(type_, value_, traceback_);
+#endif
+  }
+
+private:
+  PyObject * type_ = NULL;
+  PyObject * value_ = NULL;
+  PyObject * traceback_ = NULL;
 };
 
 // some macros cannot be used in limited API mode; redirect to the stable abi symbols
@@ -83,19 +140,38 @@ private:
 #define PyTuple_GET_SIZE PyTuple_Size
 #define PyList_GET_ITEM PyList_GetItem
 #define PyTuple_GET_ITEM PyTuple_GetItem
+#endif
 
-// PySequence_Fast should not be used in limited API
-// it was removed from limited API in 3.14
-#ifdef PySequence_Fast_GET_ITEM
-#undef PySequence_Fast_GET_ITEM
+inline
+Py_ssize_t Sequence_Fast_GET_SIZE(PyObject *o)
+{
+#ifdef Py_LIMITED_API
+  return PySequence_Length(o);
+#else
+  return PySequence_Fast_GET_SIZE(o);
 #endif
-#ifdef PySequence_Fast_GET_SIZE
-#undef PySequence_Fast_GET_SIZE
-#endif
-#define PySequence_Fast_GET_ITEM PySequence_GetItem
-#define PySequence_Fast_GET_SIZE PySequence_Length
+}
 
+inline
+PyObject* Sequence_Fast_GET_ITEM(PyObject *o, Py_ssize_t i)
+{
+#ifdef Py_LIMITED_API
+  return PySequence_GetItem(o, i); // new ref
+#else
+  return PySequence_Fast_GET_ITEM(o, i); // borrowed ref
 #endif
+}
+
+inline
+void Sequence_Fast_DECREF_ITEM(PyObject *o)
+{
+#ifdef Py_LIMITED_API
+  Py_XDECREF(o);
+#else
+  (void)o;
+#endif
+}
+
 
 void handleException();
 
@@ -180,12 +256,13 @@ convert< Bool, _PyBool_ >(Bool inB)
 
 
 /* PyInt */
-struct _PyInt_ {};
+struct _PyLong_ {};
+using _PyInt_ = _PyLong_; // deprecated alias
 
 template <>
 inline
 int
-isAPython< _PyInt_ >(PyObject * pyObj)
+isAPython< _PyLong_ >(PyObject * pyObj)
 {
   return PyLong_Check(pyObj);
 }
@@ -193,7 +270,7 @@ isAPython< _PyInt_ >(PyObject * pyObj)
 template <>
 inline
 const char *
-namePython< _PyInt_ >()
+namePython< _PyLong_ >()
 {
   return "integer";
 }
@@ -212,7 +289,7 @@ static const char* const pyBuf_formats [] =
 template <>
 struct traitsPythonType< UnsignedInteger >
 {
-  typedef _PyInt_ Type;
+  typedef _PyLong_ Type;
   static const int buf_itemsize = sizeof(UnsignedInteger);
   static const int buf_format_idx = 0; // "l"
 };
@@ -220,7 +297,7 @@ struct traitsPythonType< UnsignedInteger >
 template <>
 inline
 bool
-canConvert< _PyInt_, UnsignedInteger >(PyObject *)
+canConvert< _PyLong_, UnsignedInteger >(PyObject *)
 {
   return true;
 }
@@ -228,7 +305,7 @@ canConvert< _PyInt_, UnsignedInteger >(PyObject *)
 template <>
 inline
 UnsignedInteger
-convert< _PyInt_, UnsignedInteger >(PyObject * pyObj)
+convert< _PyLong_, UnsignedInteger >(PyObject * pyObj)
 {
   return PyLong_AsUnsignedLong(pyObj);
 }
@@ -236,7 +313,7 @@ convert< _PyInt_, UnsignedInteger >(PyObject * pyObj)
 template <>
 inline
 SignedInteger
-convert< _PyInt_, SignedInteger >(PyObject * pyObj)
+convert< _PyLong_, SignedInteger >(PyObject * pyObj)
 {
   return PyLong_AsLong(pyObj);
 }
@@ -244,7 +321,7 @@ convert< _PyInt_, SignedInteger >(PyObject * pyObj)
 template <>
 inline
 PyObject *
-convert< UnsignedInteger, _PyInt_ >(UnsignedInteger n)
+convert< UnsignedInteger, _PyLong_ >(UnsignedInteger n)
 {
   return PyLong_FromUnsignedLong(n);
 }
@@ -265,7 +342,7 @@ inline
 int
 isAPython<_NumPyInt_>(PyObject * pyObj)
 {
-  return isAPython< _PyInt_ >(pyObj) || PyObject_HasAttrString(pyObj, "__int__");
+  return isAPython< _PyLong_ >(pyObj) || PyObject_HasAttrString(pyObj, "__int__");
 }
 
 template <>
@@ -273,12 +350,12 @@ inline
 SignedInteger
 convert< _NumPyInt_, SignedInteger >(PyObject * pyObj)
 {
-  if (isAPython<_PyInt_>(pyObj))
-    return convert<_PyInt_, SignedInteger>(pyObj);
-  ScopedPyObjectPointer intValue(PyObject_CallMethod(pyObj, const_cast<char *>("__int__"), NULL));
+  if (isAPython<_PyLong_>(pyObj))
+    return convert<_PyLong_, SignedInteger>(pyObj);
+  ScopedPyObjectPointer intValue(PyObject_CallMethod(pyObj, "__int__", NULL));
   if (intValue.isNull())
     handleException();
-  return convert<_PyInt_, SignedInteger>(intValue.get());
+  return convert<_PyLong_, SignedInteger>(intValue.get());
 }
 
 /* PyFloat */
@@ -604,14 +681,16 @@ canConvertCollectionObjectFromPySequence(PyObject * pyObj)
 
   ScopedPyObjectPointer newPyObj(PySequence_Fast(pyObj, ""));
 
-  const UnsignedInteger size = PySequence_Fast_GET_SIZE(newPyObj.get());
+  const UnsignedInteger size = Sequence_Fast_GET_SIZE(newPyObj.get());
   for(UnsignedInteger i = 0; i < size; ++i)
   {
-    PyObject * elt = PySequence_Fast_GET_ITEM(newPyObj.get(), i);
+    PyObject * elt = Sequence_Fast_GET_ITEM(newPyObj.get(), i);
     if (!canConvert< typename traitsPythonType< T >::Type, T >(elt))
     {
+      Sequence_Fast_DECREF_ITEM(elt);
       return false;
     }
+    Sequence_Fast_DECREF_ITEM(elt);
   }
 
   return true;
@@ -628,7 +707,7 @@ buildCollectionFromPySequence(PyObject * pyObj, int sz = 0)
   check<_PySequence_>(pyObj);
   ScopedPyObjectPointer newPyObj(PySequence_Fast(pyObj, ""));
   if (!newPyObj.get()) throw InvalidArgumentException(HERE) << "Not a sequence object";
-  const UnsignedInteger size = PySequence_Fast_GET_SIZE(newPyObj.get());
+  const UnsignedInteger size = Sequence_Fast_GET_SIZE(newPyObj.get());
   if ((sz != 0) && (sz != (int)size))
   {
     throw InvalidArgumentException(HERE) << "Sequence object has incorrect size " << size << ". Must be " << sz << ".";
@@ -637,17 +716,18 @@ buildCollectionFromPySequence(PyObject * pyObj, int sz = 0)
 
   for(UnsignedInteger i = 0; i < size; ++i)
   {
-    PyObject * elt = PySequence_Fast_GET_ITEM(newPyObj.get(), i);
+    PyObject * elt = Sequence_Fast_GET_ITEM(newPyObj.get(), i);
     try
     {
-      check<typename traitsPythonType< T >::Type>(elt);
+      (*p_coll)[i] = checkAndConvert< typename traitsPythonType< T >::Type, T >(elt);
+      Sequence_Fast_DECREF_ITEM(elt);
     }
-    catch (const InvalidArgumentException &)
+    catch (const Exception &)
     {
       delete p_coll;
+      Sequence_Fast_DECREF_ITEM(elt);
       throw;
     }
-    (*p_coll)[i] = convert< typename traitsPythonType< T >::Type, T >(elt);
   }
 
   return p_coll;
@@ -772,8 +852,7 @@ convert<_PySequence_, Collection<Complex> >(PyObject * pyObj)
 inline
 void handleException()
 {
-  PyObject * exceptionType = PyErr_Occurred();
-  if (!exceptionType)
+  if (!PyErr_Occurred())
     return;
 
   // retrieve error and clear indicator
@@ -792,41 +871,7 @@ void handleException()
   PyErr_NormalizeException(&type, &value, &traceback);
 #endif
 
-  // show exception value first
-  ScopedPyObjectPointer valueString(PyObject_Str(value ? value : Py_None));
-  if (valueString.isNull())
-    throw InternalException(HERE) << "handleException: cannot format exception value";
-  String exceptionMessage = convert< _PyString_, String >(valueString.get());
-
-  // format traceback
-  ScopedPyObjectPointer tracebackModule(PyImport_ImportModule("traceback"));
-  if (tracebackModule.isNull())
-    throw InternalException(HERE) << "handleException: cannot import traceback";
-  ScopedPyObjectPointer tbexcClass(PyObject_GetAttrString(tracebackModule.get(), "TracebackException"));
-  if (tbexcClass.isNull())
-    throw InternalException(HERE) << "handleException: cannot access TracebackException";
-  ScopedPyObjectPointer tbexcInstance(PyObject_CallFunctionObjArgs(tbexcClass.get(),
-                                      type ? type : Py_None,
-                                      value  ? value  : Py_None,
-                                      traceback ? traceback : Py_None,
-                                      NULL));
-  if (tbexcInstance.isNull())
-    throw InternalException(HERE) << "handleException: cannot create TracebackException";
-  ScopedPyObjectPointer formatMethod(PyObject_GetAttrString(tbexcInstance.get(), "format"));
-  if (formatMethod.isNull())
-    throw InternalException(HERE) << "handleException: cannot access format()";
-  ScopedPyObjectPointer formatIterator(PyObject_CallObject(formatMethod.get(), NULL));
-  if (formatIterator.isNull())
-    throw InternalException(HERE) << "handleException: cannot format traceback";
-
-  PyObject *line = NULL;
-  exceptionMessage += "\n";
-  while ((line = PyIter_Next(formatIterator.get())))
-  {
-    exceptionMessage += convert< _PyString_, String >(line);
-    Py_DECREF(line);
-  }
-  throw InternalException(HERE) << exceptionMessage;
+  throw PythonInternalException(type, value, traceback);
 }
 
 
@@ -879,7 +924,7 @@ convert< _PySequence_, Sample >(PyObject * pyObj)
   }
 #endif
   // use the same conversion function for numpy array/matrix, knowing numpy matrix is not a sequence
-  if (PyObject_HasAttrString(pyObj, const_cast<char *>("shape")))
+  if (PyObject_HasAttrString(pyObj, "shape"))
   {
     ScopedPyObjectPointer shapeObj(PyObject_GetAttrString(pyObj, "shape"));
     if (!shapeObj.get()) throw;
@@ -894,10 +939,10 @@ convert< _PySequence_, Sample >(PyObject * pyObj)
       Sample sample(size, dimension);
       for (UnsignedInteger i = 0; i < size; ++ i)
       {
-        PyTuple_SetItem(askObj.get(), 0, convert< UnsignedInteger, _PyInt_ >(i));
+        PyTuple_SetItem(askObj.get(), 0, convert< UnsignedInteger, _PyLong_ >(i));
         for (UnsignedInteger j = 0; j < dimension; ++ j)
         {
-          PyTuple_SetItem(askObj.get(), 1, convert< UnsignedInteger, _PyInt_ >(j));
+          PyTuple_SetItem(askObj.get(), 1, convert< UnsignedInteger, _PyLong_ >(j));
           ScopedPyObjectPointer elt(PyObject_CallMethodObjArgs(pyObj, methodObj.get(), askObj.get(), NULL));
           if (elt.get())
           {
@@ -915,32 +960,35 @@ convert< _PySequence_, Sample >(PyObject * pyObj)
   check<_PySequence_>(pyObj);
   ScopedPyObjectPointer newPyObj(PySequence_Fast(pyObj, ""));
   if (!newPyObj.get()) throw InvalidArgumentException(HERE) << "Not a sequence object";
-  const UnsignedInteger size = PySequence_Fast_GET_SIZE(newPyObj.get());
+  const UnsignedInteger size = Sequence_Fast_GET_SIZE(newPyObj.get());
   if (size == 0) return Sample();
 
   // Get dimension of first point
-  PyObject * firstPoint = PySequence_Fast_GET_ITEM(newPyObj.get(), 0);
+  PyObject * firstPoint = Sequence_Fast_GET_ITEM(newPyObj.get(), 0);
   check<_PySequence_>(firstPoint);
   ScopedPyObjectPointer newPyFirstObj(PySequence_Fast(firstPoint, ""));
-  const UnsignedInteger dimension = PySequence_Fast_GET_SIZE(newPyFirstObj.get());
+  Sequence_Fast_DECREF_ITEM(firstPoint);
+  const UnsignedInteger dimension = Sequence_Fast_GET_SIZE(newPyFirstObj.get());
   // Allocate result Sample
   Sample sample(size, dimension);
   for(UnsignedInteger i = 0; i < size; ++i)
   {
-    PyObject * pointObj = PySequence_Fast_GET_ITEM(newPyObj.get(), i);
+    PyObject * pointObj = Sequence_Fast_GET_ITEM(newPyObj.get(), i);
     ScopedPyObjectPointer newPyPointObj(PySequence_Fast(pointObj, ""));
     if (i > 0)
     {
       // Check that object is a sequence, and has the right size
       check<_PySequence_>(pointObj);
-      const UnsignedInteger subDim = static_cast<UnsignedInteger>(PySequence_Fast_GET_SIZE(newPyPointObj.get()));
+      const UnsignedInteger subDim = static_cast<UnsignedInteger>(Sequence_Fast_GET_SIZE(newPyPointObj.get()));
       if (subDim != dimension)
         throw InvalidArgumentException(HERE) << "Inner sequences must have the same dimension";
     }
+    Sequence_Fast_DECREF_ITEM(pointObj);
     for(UnsignedInteger j = 0; j < dimension; ++j)
     {
-      PyObject * value = PySequence_Fast_GET_ITEM(newPyPointObj.get(), j);
+      PyObject * value = Sequence_Fast_GET_ITEM(newPyPointObj.get(), j);
       sample(i, j) = checkAndConvert<_PyFloat_, Scalar>(value);
+      Sequence_Fast_DECREF_ITEM(value);
     }
   }
   return sample;
@@ -1026,7 +1074,7 @@ convert< Indices, _PySequence_ >(Indices inP)
   PyObject * point = PyTuple_New(dimension);
   for (UnsignedInteger i = 0; i < dimension; ++ i)
   {
-    PyTuple_SetItem(point, i, convert< UnsignedInteger, _PyInt_ >(inP[i]));
+    PyTuple_SetItem(point, i, convert< UnsignedInteger, _PyLong_ >(inP[i]));
   }
   return point;
 }
@@ -1079,7 +1127,7 @@ convert< _PySequence_, IndicesCollection >(PyObject * pyObj)
   }
 #endif
   // use the same conversion function for numpy array/matrix, knowing numpy matrix is not a sequence
-  if (PyObject_HasAttrString(pyObj, const_cast<char *>("shape")))
+  if (PyObject_HasAttrString(pyObj, "shape"))
   {
     ScopedPyObjectPointer shapeObj(PyObject_GetAttrString(pyObj, "shape"));
     if (shapeObj.get())
@@ -1094,10 +1142,10 @@ convert< _PySequence_, IndicesCollection >(PyObject * pyObj)
         IndicesCollection indices(size, dimension);
         for (UnsignedInteger i = 0; i < size; ++ i)
         {
-          PyTuple_SetItem(askObj.get(), 0, convert< UnsignedInteger, _PyInt_ >(i));
+          PyTuple_SetItem(askObj.get(), 0, convert< UnsignedInteger, _PyLong_ >(i));
           for (UnsignedInteger j = 0; j < dimension; ++ j)
           {
-            PyTuple_SetItem(askObj.get(), 1, convert< UnsignedInteger, _PyInt_ >(j));
+            PyTuple_SetItem(askObj.get(), 1, convert< UnsignedInteger, _PyLong_ >(j));
             ScopedPyObjectPointer elt(PyObject_CallMethodObjArgs(pyObj, methodObj.get(), askObj.get(), NULL));
             if (elt.get())
               indices(i, j) = checkAndConvert<_NumPyInt_, SignedInteger>(elt.get());
@@ -1113,22 +1161,24 @@ convert< _PySequence_, IndicesCollection >(PyObject * pyObj)
   check<_PySequence_>(pyObj);
   ScopedPyObjectPointer newPyObj(PySequence_Fast(pyObj, ""));
   if (!newPyObj.get()) throw InvalidArgumentException(HERE) << "Not a sequence object";
-  const UnsignedInteger size = PySequence_Fast_GET_SIZE(newPyObj.get());
+  const UnsignedInteger size = Sequence_Fast_GET_SIZE(newPyObj.get());
   if (size == 0) return IndicesCollection();
   // Allocate a Collection of Indices
   Collection<Indices> coll(size);
   for(UnsignedInteger i = 0; i < size; ++i)
   {
-    PyObject * indicesObj = PySequence_Fast_GET_ITEM(newPyObj.get(), i);
+    PyObject * indicesObj = Sequence_Fast_GET_ITEM(newPyObj.get(), i);
     ScopedPyObjectPointer newPyIndicesObj(PySequence_Fast(indicesObj, ""));
     // Check that object is a sequence
     check<_PySequence_>(indicesObj);
-    const UnsignedInteger dimension = PySequence_Fast_GET_SIZE(newPyIndicesObj.get());
+    Sequence_Fast_DECREF_ITEM(indicesObj);
+    const UnsignedInteger dimension = Sequence_Fast_GET_SIZE(newPyIndicesObj.get());
     Indices newIndices(dimension);
     for(UnsignedInteger j = 0; j < dimension; ++j)
     {
-      PyObject * value = PySequence_Fast_GET_ITEM(newPyIndicesObj.get(), j);
-      newIndices[j] = checkAndConvert<_PyInt_, UnsignedInteger>(value);
+      PyObject * value = Sequence_Fast_GET_ITEM(newPyIndicesObj.get(), j);
+      newIndices[j] = checkAndConvert<_PyLong_, UnsignedInteger>(value);
+      Sequence_Fast_DECREF_ITEM(value);
     }
     coll[i] = newIndices;
   }
@@ -1209,7 +1259,7 @@ inline
 MatrixImplementation*
 convert< _PySequence_, MatrixImplementation* >(PyObject * pyObj)
 {
-  MatrixImplementation *p_implementation = 0;
+  MatrixImplementation *p_implementation = nullptr;
 #if !defined(Py_LIMITED_API) || (Py_LIMITED_API >= 0x030b0000)
   // Check whether pyObj follows the buffer protocol
   if (PyObject_CheckBuffer(pyObj))
@@ -1247,7 +1297,7 @@ convert< _PySequence_, MatrixImplementation* >(PyObject * pyObj)
   }
 #endif
   // use the same conversion function for numpy array/matrix, knowing numpy matrix is not a sequence
-  if (PyObject_HasAttrString(pyObj, const_cast<char *>("shape")))
+  if (PyObject_HasAttrString(pyObj, "shape"))
   {
     ScopedPyObjectPointer shapeObj(PyObject_GetAttrString(pyObj, "shape"));
     if (shapeObj.get())
@@ -1262,10 +1312,10 @@ convert< _PySequence_, MatrixImplementation* >(PyObject * pyObj)
         p_implementation = new MatrixImplementation(nbRows, nbColumns);
         for (UnsignedInteger i = 0; i < nbRows; ++ i)
         {
-          PyTuple_SetItem(askObj.get(), 0, convert< UnsignedInteger, _PyInt_ >(i));
+          PyTuple_SetItem(askObj.get(), 0, convert< UnsignedInteger, _PyLong_ >(i));
           for (UnsignedInteger j = 0; j < nbColumns; ++ j)
           {
-            PyTuple_SetItem(askObj.get(), 1, convert< UnsignedInteger, _PyInt_ >(j));
+            PyTuple_SetItem(askObj.get(), 1, convert< UnsignedInteger, _PyLong_ >(j));
             ScopedPyObjectPointer elt(PyObject_CallMethodObjArgs(pyObj, methodObj.get(), askObj.get(), NULL));
             if (elt.get())
             {
@@ -1279,31 +1329,17 @@ convert< _PySequence_, MatrixImplementation* >(PyObject * pyObj)
                 throw;
               }
             }
+            else
+            {
+              delete p_implementation;
+              throw InvalidArgumentException(HERE) << "Call to __getitem__ failed";
+            }
           }
         }
       }
       else
         throw InvalidArgumentException(HERE) << "Invalid array dimension: " << shape.getSize();
     }
-  }
-  else if (PyObject_HasAttrString(pyObj, const_cast<char *>("getNbColumns")))
-  {
-    // case of conversion from XMatrix to YMatrix
-    // X could be Square,Triangular,Identity...
-    // YMatrix might be Matrix of one of its inheritance types
-    ScopedPyObjectPointer colunmsObj(PyObject_CallMethod (pyObj,
-                                     const_cast<char *>("getNbColumns"),
-                                     const_cast<char *>("()")));
-    ScopedPyObjectPointer rowsObj(PyObject_CallMethod (pyObj,
-                                  const_cast<char *>("getNbRows"),
-                                  const_cast<char *>("()")));
-    ScopedPyObjectPointer implObj(PyObject_CallMethod (pyObj,
-                                  const_cast<char *>("getImplementation"),
-                                  const_cast<char *>("()")));
-    Pointer< Collection< Scalar > > ptr = buildCollectionFromPySequence< Scalar >(implObj.get());
-    UnsignedInteger nbColumns = checkAndConvert< _PyInt_, UnsignedInteger >(colunmsObj.get());
-    UnsignedInteger nbRows = checkAndConvert< _PyInt_, UnsignedInteger >(rowsObj.get());
-    p_implementation = new MatrixImplementation(nbRows, nbColumns, *ptr);
   }
   else
   {
@@ -1340,7 +1376,10 @@ convert< _PySequence_, SquareMatrix >(PyObject * pyObj)
 {
   MatrixImplementation *p_implementation = convert< _PySequence_, MatrixImplementation* >(pyObj);
   if (p_implementation->getNbRows() != p_implementation->getNbColumns())
+  {
+    delete p_implementation;
     throw InvalidArgumentException(HERE) << "The matrix is not square";
+  }
   return SquareMatrix(p_implementation);
 }
 
@@ -1541,7 +1580,7 @@ convert< _PySequence_, ComplexMatrixImplementation* >(PyObject * pyObj)
   }
 #endif
   // use the same conversion function for numpy array/matrix, knowing numpy matrix is not a sequence
-  if (PyObject_HasAttrString(pyObj, const_cast<char *>("shape")))
+  if (PyObject_HasAttrString(pyObj, "shape"))
   {
     ScopedPyObjectPointer shapeObj(PyObject_GetAttrString(pyObj, "shape"));
     if (shapeObj.get())
@@ -1556,10 +1595,10 @@ convert< _PySequence_, ComplexMatrixImplementation* >(PyObject * pyObj)
         ComplexMatrixImplementation *p_implementation = new ComplexMatrixImplementation(nbRows, nbColumns);
         for (UnsignedInteger i = 0; i < nbRows; ++ i)
         {
-          PyTuple_SetItem(askObj.get(), 0, convert< UnsignedInteger, _PyInt_ >(i));
+          PyTuple_SetItem(askObj.get(), 0, convert< UnsignedInteger, _PyLong_ >(i));
           for (UnsignedInteger j = 0; j < nbColumns; ++ j)
           {
-            PyTuple_SetItem(askObj.get(), 1, convert< UnsignedInteger, _PyInt_ >(j));
+            PyTuple_SetItem(askObj.get(), 1, convert< UnsignedInteger, _PyLong_ >(j));
             ScopedPyObjectPointer elt(PyObject_CallMethodObjArgs(pyObj, methodObj.get(), askObj.get(), NULL));
             if (elt.get())
             {
@@ -1580,27 +1619,6 @@ convert< _PySequence_, ComplexMatrixImplementation* >(PyObject * pyObj)
       else
         throw InvalidArgumentException(HERE) << "Invalid array dimension: " << shape.getSize();
     }
-  }
-
-  // case of conversion from XMatrix to YMatrix
-  // X could be Square,Triangular,Identity...
-  // YMatrix might be Matrix of one of its inheritance types
-  if (PyObject_HasAttrString(pyObj, const_cast<char *>("getNbColumns")))
-  {
-    ScopedPyObjectPointer colunmsObj(PyObject_CallMethod (pyObj,
-                                     const_cast<char *>("getNbColumns"),
-                                     const_cast<char *>("()")));
-    ScopedPyObjectPointer rowsObj(PyObject_CallMethod (pyObj,
-                                  const_cast<char *>("getNbRows"),
-                                  const_cast<char *>("()")));
-    ScopedPyObjectPointer implObj(PyObject_CallMethod (pyObj,
-                                  const_cast<char *>("getImplementation"),
-                                  const_cast<char *>("()")));
-    Pointer< Collection< Complex > > ptr = buildCollectionFromPySequence< Complex >(implObj.get());
-    UnsignedInteger nbColumns = checkAndConvert< _PyInt_, UnsignedInteger >(colunmsObj.get());
-    UnsignedInteger nbRows = checkAndConvert< _PyInt_, UnsignedInteger >(rowsObj.get());
-    ComplexMatrixImplementation *p_implementation = new ComplexMatrixImplementation(nbRows, nbColumns, *ptr);
-    return p_implementation;
   }
 
   // else try to convert from a sequence of sequences
@@ -1723,7 +1741,7 @@ convert< _PySequence_, ComplexTensorImplementation* >(PyObject * pyObj)
   }
 #endif
   // use the same conversion function for numpy array/matrix, knowing numpy matrix is not a sequence
-  if (PyObject_HasAttrString(pyObj, const_cast<char *>("shape")))
+  if (PyObject_HasAttrString(pyObj, "shape"))
   {
     ScopedPyObjectPointer shapeObj(PyObject_GetAttrString(pyObj, "shape"));
     if (shapeObj.get())
@@ -1739,13 +1757,13 @@ convert< _PySequence_, ComplexTensorImplementation* >(PyObject * pyObj)
         p_implementation = new ComplexTensorImplementation(nbRows, nbColumns, nbSheets);
         for (UnsignedInteger i = 0; i < nbRows; ++ i)
         {
-          PyTuple_SetItem(askObj.get(), 0, convert< UnsignedInteger, _PyInt_ >(i));
+          PyTuple_SetItem(askObj.get(), 0, convert< UnsignedInteger, _PyLong_ >(i));
           for (UnsignedInteger j = 0; j < nbColumns; ++ j)
           {
-            PyTuple_SetItem(askObj.get(), 1, convert< UnsignedInteger, _PyInt_ >(j));
+            PyTuple_SetItem(askObj.get(), 1, convert< UnsignedInteger, _PyLong_ >(j));
             for (UnsignedInteger k = 0; k < nbSheets; ++ k)
             {
-              PyTuple_SetItem(askObj.get(), 2, convert< UnsignedInteger, _PyInt_ >(k));
+              PyTuple_SetItem(askObj.get(), 2, convert< UnsignedInteger, _PyLong_ >(k));
               ScopedPyObjectPointer elt(PyObject_CallMethodObjArgs(pyObj, methodObj.get(), askObj.get(), NULL));
               if (elt.get())
               {
@@ -1767,25 +1785,17 @@ convert< _PySequence_, ComplexTensorImplementation* >(PyObject * pyObj)
         throw InvalidArgumentException(HERE) << "Invalid array dimension: " << shape.getSize();
     }
   }
-  else if (PyObject_HasAttrString(pyObj, const_cast<char *>("getNbSheets")))
+  else if (PyObject_HasAttrString(pyObj, "getNbSheets"))
   {
     // case of conversion from XTensor to YTensor
-    ScopedPyObjectPointer colunmsObj(PyObject_CallMethod (pyObj,
-                                     const_cast<char *>("getNbColumns"),
-                                     const_cast<char *>("()")));
-    ScopedPyObjectPointer rowsObj(PyObject_CallMethod (pyObj,
-                                  const_cast<char *>("getNbRows"),
-                                  const_cast<char *>("()")));
-    ScopedPyObjectPointer sheetsObj(PyObject_CallMethod (pyObj,
-                                    const_cast<char *>("getNbSheets"),
-                                    const_cast<char *>("()")));
-    ScopedPyObjectPointer implObj(PyObject_CallMethod (pyObj,
-                                  const_cast<char *>("getImplementation"),
-                                  const_cast<char *>("()")));
+    ScopedPyObjectPointer colunmsObj(PyObject_CallMethod(pyObj,"getNbColumns", "()"));
+    ScopedPyObjectPointer rowsObj(PyObject_CallMethod(pyObj, "getNbRows", "()"));
+    ScopedPyObjectPointer sheetsObj(PyObject_CallMethod(pyObj, "getNbSheets", "()"));
+    ScopedPyObjectPointer implObj(PyObject_CallMethod(pyObj, "getImplementation", "()"));
     Pointer< Collection< Complex > > ptr = buildCollectionFromPySequence< Complex >(implObj.get());
-    UnsignedInteger nbColumns = checkAndConvert< _PyInt_, UnsignedInteger >(colunmsObj.get());
-    UnsignedInteger nbRows = checkAndConvert< _PyInt_, UnsignedInteger >(rowsObj.get());
-    UnsignedInteger nbSheets = checkAndConvert< _PyInt_, UnsignedInteger >(sheetsObj.get());
+    UnsignedInteger nbColumns = checkAndConvert< _PyLong_, UnsignedInteger >(colunmsObj.get());
+    UnsignedInteger nbRows = checkAndConvert< _PyLong_, UnsignedInteger >(rowsObj.get());
+    UnsignedInteger nbSheets = checkAndConvert< _PyLong_, UnsignedInteger >(sheetsObj.get());
     p_implementation = new ComplexTensorImplementation(nbRows, nbColumns, nbSheets, *ptr);
   }
   return p_implementation;
@@ -1919,7 +1929,7 @@ void pickleLoad(Advocate & adv, PyObject * & pyObj, const String attributName = 
 
 
 inline
-ScopedPyObjectPointer deepCopy(PyObject * pyObj)
+PyObject* deepCopy(PyObject* pyObj)
 {
   ScopedPyObjectPointer copyModule(PyImport_ImportModule("copy"));
   if (copyModule.isNull())
@@ -1929,8 +1939,8 @@ ScopedPyObjectPointer deepCopy(PyObject * pyObj)
   if (deepCopyMethod.isNull())
     throw InternalException(HERE) << "cannot access deepcopy()";
 
-  ScopedPyObjectPointer pyObjDeepCopy(PyObject_CallFunctionObjArgs(deepCopyMethod.get(), pyObj, NULL));
-  if (pyObjDeepCopy.isNull())
+  PyObject* pyObjDeepCopy = PyObject_CallFunctionObjArgs(deepCopyMethod.get(), pyObj, NULL);
+  if (pyObjDeepCopy == NULL)
     handleException();
   return pyObjDeepCopy;
 }

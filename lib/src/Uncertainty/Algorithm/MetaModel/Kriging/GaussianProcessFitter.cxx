@@ -78,7 +78,7 @@ void GaussianProcessFitter::setCovarianceModel(const CovarianceModel & covarianc
   // Now, adapt the model parameters.
   // First, check if the parameters have to be optimized. If not, remove all the active parameters.
   analyticalAmplitude_ = false;
-  const Description activeParametersDescription(reducedCovarianceModel_.getParameterDescription());
+  Description activeParametersDescription(reducedCovarianceModel_.getParameterDescription());
   if (!optimizeParameters_) reducedCovarianceModel_.setActiveParameter(Indices());
   // Second, check if the amplitude parameter is unique and active
   else if (ResourceMap::GetAsBool("GaussianProcessFitter-UseAnalyticalAmplitudeEstimate") && !noise_.getSize())
@@ -103,6 +103,8 @@ void GaussianProcessFitter::setCovarianceModel(const CovarianceModel & covarianc
           break;
         }
     } // reducedCovarianceModel_.getDimension() == 1
+    // Refresh description after amplitude_0 removal so indices stay consistent
+    activeParametersDescription = reducedCovarianceModel_.getParameterDescription();
   } // optimizeParameters_
   LOGDEBUG(OSS() << "final active parameters=" << reducedCovarianceModel_.getActiveParameter());
   // Define the bounds of the optimization problem
@@ -141,8 +143,8 @@ void GaussianProcessFitter::setCovarianceModel(const CovarianceModel & covarianc
       for (UnsignedInteger k = 0; k < activeScalesPositions.getSize(); ++k)
       {
         const Scalar rangeK = inputSampleRange[activeScalesIndices[k]];
-        lowerBound[k] = rangeK * lowerBoundScaleFactor;
-        upperBound[k] = rangeK * upperBoundScaleFactor;
+        lowerBound[activeScalesPositions[k]] = rangeK * lowerBoundScaleFactor;
+        upperBound[activeScalesPositions[k]] = rangeK * upperBoundScaleFactor;
       } // k (upper bounds setting)
     } // if active scale
     if (activeNugget.getSize() > 0)
@@ -746,13 +748,19 @@ void GaussianProcessFitter::setNoise(const CovarianceMatrixCollection & noise)
 void GaussianProcessFitter::setNoise(const Point & noise)
 {
   const UnsignedInteger size = inputSample_.getSize();
+  const UnsignedInteger outputDimension = outputSample_.getDimension();
   if (noise.getSize() != size) throw InvalidArgumentException(HERE) << "Noise size=" << noise.getSize()  << " does not match sample size=" << size;
   for (UnsignedInteger i = 0; i < size; ++ i)
     if (!(noise[i] >= 0.0))
       throw InvalidArgumentException(HERE) << "The noise must be nonnegative, got " << noise[i] << " at index " << i;
   noise_.resize(size);
   for (UnsignedInteger i = 0; i < size; ++ i)
-    noise_[i] = CovarianceMatrix(1, {noise[i]});
+  {
+    CovarianceMatrix noiseMatrix(outputDimension);
+    for (UnsignedInteger j = 0; j < outputDimension; ++ j)
+      noiseMatrix(j, j) = noise[i];
+    noise_[i] = noiseMatrix;
+  }
 
   // If we update noise, we need to reset
   reset();

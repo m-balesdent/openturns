@@ -27,7 +27,7 @@ cmake -DCMAKE_INSTALL_PREFIX=${HOME}/.local \
       -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic -Wshadow -Wsuggest-override -Werror -D_GLIBCXX_ASSERTIONS" \
       -DCMAKE_LINKER_TYPE=MOLD \
       -DSWIG_COMPILE_FLAGS="-O1 -Wno-unused-parameter -Wno-shadow" -DSWIG_CXX_COMPILE_FLAGS="-Wno-suggest-override" \
-      -DUSE_SPHINX=ON -DSPHINX_FLAGS="-W -T -j4" \
+      -DUSE_SPHINX=ON -DSPHINX_FLAGS="-W -T -j4" -DUSE_SPHINX_EXT_MATHJAX=OFF \
       -B build ${source_dir}
 cd build
 make install
@@ -37,6 +37,10 @@ then
   cp -r ~/.local/share/doc/openturns/html .
   zip -r openturns-doc.zip html/*
   sudo chown ${UID_GID} openturns-doc.zip && sudo cp -p openturns-doc.zip ${source_dir}
+fi
+if test "${CIRCLE_BRANCH}" = "master"
+then
+  exit 0
 fi
 ctest -R pyinstallcheck --output-on-failure --timeout 100 ${MAKEFLAGS} --repeat after-timeout:2 --schedule-random
 #make tests

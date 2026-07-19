@@ -31,6 +31,7 @@ BEGIN_NAMESPACE_OPENTURNS
 
 CLASSNAMEINIT(GaussianProcessFitterResult)
 static const Factory<GaussianProcessFitterResult> Factory_GaussianProcessFitterResult;
+static const Factory<PersistentCollection<CovarianceMatrix> > Factory_PersistentCollection_CovarianceMatrix;
 
 /* Default constructor */
 GaussianProcessFitterResult::GaussianProcessFitterResult()
@@ -155,12 +156,12 @@ void GaussianProcessFitterResult::setCholeskyFactor(const TriangularMatrix & cov
   const UnsignedInteger outputDimension = getMetaModel().getOutputDimension();
   if (covarianceCholeskyFactor.getDimension() != 0 && covarianceCholeskyFactor.getDimension() != size * outputDimension)
     throw InvalidArgumentException(HERE) << "In GaussianProcessFitterResult::setCholeskyFactor, Cholesky factor has unexpected dimensions. Its dimension should be " << size * outputDimension << ". Here dimension = " << covarianceCholeskyFactor.getDimension();
-  if (covarianceHMatrix_.getNbRows() != 0)
+  if (covarianceHMatrix.getNbRows() != 0)
   {
-    if (covarianceHMatrix_.getNbRows() != covarianceHMatrix_.getNbColumns())
-      throw InvalidArgumentException(HERE) << "In GaussianProcessFitterResult::setCholeskyFactor, HMAT Cholesky factor is not square. Its dimension is " << covarianceHMatrix_.getNbRows() << "x" << covarianceHMatrix_.getNbColumns();
-    if (covarianceHMatrix_.getNbRows() != size * outputDimension)
-      throw InvalidArgumentException(HERE) << "In GaussianProcessFitterResult::setCholeskyFactor, HMAT Cholesky factor has unexpected dimensions. Its dimension should be " << size * outputDimension << ". Here dimension = " << covarianceHMatrix_.getNbRows();
+    if (covarianceHMatrix.getNbRows() != covarianceHMatrix.getNbColumns())
+      throw InvalidArgumentException(HERE) << "In GaussianProcessFitterResult::setCholeskyFactor, HMAT Cholesky factor is not square. Its dimension is " << covarianceHMatrix.getNbRows() << "x" << covarianceHMatrix.getNbColumns();
+    if (covarianceHMatrix.getNbRows() != size * outputDimension)
+      throw InvalidArgumentException(HERE) << "In GaussianProcessFitterResult::setCholeskyFactor, HMAT Cholesky factor has unexpected dimensions. Its dimension should be " << size * outputDimension << ". Here dimension = " << covarianceHMatrix.getNbRows();
   }
   covarianceCholeskyFactor_ = covarianceCholeskyFactor;
   covarianceHMatrix_ = covarianceHMatrix;

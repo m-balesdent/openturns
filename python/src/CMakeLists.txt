@@ -553,6 +553,11 @@ ot_add_python_module(model_copula2 model_copula2_module.i
 
 ot_add_python_module(experimental experimental_module.i
                      MarginalUniformOrderStatistics.i MarginalUniformOrderStatistics_doc.i
+                     MultivariateUniform.i MultivariateUniform_doc.i
+                     MultivariateUniformFactory.i MultivariateUniformFactory_doc.i
+                     TruncatedDistributionFactory.i TruncatedDistributionFactory_doc.i
+                     SquaredNormalFactory.i SquaredNormalFactory_doc.i
+                     InverseGammaFactory.i InverseGammaFactory_doc.i
                      FejerExperiment.i FejerExperiment_doc.i
                      EfficientGlobalOptimization.i EfficientGlobalOptimization_doc.i
                      HiGHS.i HiGHS_doc.i
@@ -652,7 +657,9 @@ ot_add_python_module(simulation simulation_module.i
                       RankSobolSensitivityAlgorithm.i RankSobolSensitivityAlgorithm_doc.i
                       SimulationSensitivityAnalysis.i SimulationSensitivityAnalysis_doc.i
                       ProbabilitySimulationResult.i ProbabilitySimulationResult_doc.i
+                      SimulationResultImplementation.i SimulationResultImplementation_doc.i
                       SimulationResult.i SimulationResult_doc.i
+                      SimulationAlgorithmImplementation.i SimulationAlgorithmImplementation_doc.i
                       SimulationAlgorithm.i SimulationAlgorithm_doc.i
                       EventSimulation.i EventSimulation_doc.i
                       ProbabilitySimulationAlgorithm.i ProbabilitySimulationAlgorithm_doc.i

@@ -24,7 +24,7 @@
 #include "openturns/DistFunc.hxx"
 #include "openturns/MultiStart.hxx"
 #include "openturns/JointDistribution.hxx"
-#include "openturns/Uniform.hxx"
+#include "openturns/MultivariateUniform.hxx"
 #include "openturns/GaussianProcessFitter.hxx"
 #include "openturns/GaussianProcessRegression.hxx"
 #include "openturns/GaussianProcessConditionalCovariance.hxx"
@@ -93,6 +93,7 @@ public:
     const Scalar mx = gprCov_.getConditionalMean(x)[0];
     const Scalar fmMk = isMinimization_ ? optimalValue_ - mx : mx - optimalValue_;
     const Scalar sk2 = gprCov_.getConditionalMarginalVariance(x);
+    if (sk2 <= 0.0) return 0.0;
     const Scalar sk = std::sqrt(sk2);
     if (!std::isfinite(sk))
       return SpecFunc::LowestScalar;
@@ -102,7 +103,10 @@ public:
     {
       const Scalar noiseVariance = noiseFunction_(x)[0];
       if (!(noiseVariance >= 0.0)) throw InvalidArgumentException(HERE) << "Noise-induced variance must be nonnegative, but is " << noiseVariance << " at point " << x;
-      ei *= (1.0 - std::sqrt(noiseVariance) / std::sqrt(noiseVariance + sk2));
+      if (sk2 > 0.0)
+        ei *= (1.0 - std::sqrt(noiseVariance) / std::sqrt(noiseVariance + sk2));
+      else
+        ei = 0.0;
     }
     return ei;
   }
@@ -236,14 +240,12 @@ void EfficientGlobalOptimization::run()
       const Point upperBound(bounds.getUpperBound());
       const Interval::BoolCollection finiteLowerBound(bounds.getFiniteLowerBound());
       const Interval::BoolCollection finiteUpperBound(bounds.getFiniteUpperBound());
-      JointDistribution::DistributionCollection coll;
       for (UnsignedInteger i = 0; i < dimension; ++ i)
       {
         if (!finiteLowerBound[i] || !finiteUpperBound[i])
           throw InvalidArgumentException(HERE) << "Bounds must be finite";
-        coll.add(Uniform(lowerBound[i], upperBound[i]));
       }
-      const JointDistribution distribution(coll);
+      const MultivariateUniform distribution(lowerBound, upperBound);
       Sample improvementExperiment(distribution.getSample(multiStartExperimentSize_));
       // retain best P/N points as starting points
       improvementExperiment.stack(improvementObjective(improvementExperiment));

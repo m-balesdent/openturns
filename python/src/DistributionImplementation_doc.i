@@ -319,6 +319,8 @@ Parameters
 ----------
 x : sequence of float, with size :math:`d`
     Values to be taken sequentially as argument and conditioning part of the CDF.
+ordering : sequence of int, optional
+    Permutation of :math:`[0,\\ldots,d-1]` specifying the variable order.
 
 Returns
 -------
@@ -340,7 +342,8 @@ where for :math:`2 \leq j \leq d`:
     F_{X_j \mid X_1, \ldots, X_{j - 1}}(x_j; x_1, \dots, x_{j-1}) =
     \Prob{X_j \leq x_j \mid X_1=x_1, \ldots, X_{j-1}=x_{j-1}}.
 
-The first term, for :math:`j=1`, is :math:`F_{X_1}(x_1)`.)RAW"
+The first term, for :math:`j=1`, is :math:`F_{X_1}(x_1)`.
+When an *ordering* is given, the variables are processed in the specified order instead of the natural order.)RAW"
 
 %enddef
 %feature("docstring") OT::DistributionImplementation::computeSequentialConditionalCDF
@@ -391,6 +394,8 @@ Parameters
 ----------
 x : sequence of float, with size :math:`d`
     Values to be taken sequentially as argument and conditioning part of the PDF.
+ordering : sequence of int, optional
+    Permutation of :math:`[0,\\ldots,d-1]` specifying the variable order.
 
 Returns
 -------
@@ -412,7 +417,8 @@ where for :math:`2 \leq j \leq d`:
     F_{X_j \mid X_1, \ldots, X_{j - 1}}(x_j; x_1, \dots, x_{j-1}) =
     \Prob{X_j \leq x_j \mid X_1=x_1, \ldots, X_{j-1}=x_{j-1}}.
 
-The first term, for :math:`j=1`, is :math:`\dfrac{d}{d\,x_1}F_{X_1}(x_1)`.)RAW"
+The first term, for :math:`j=1`, is :math:`\dfrac{d}{d\,x_1}F_{X_1}(x_1)`.
+When an *ordering* is given, the variables are processed in the specified order instead of the natural order.)RAW"
 
 %enddef
 %feature("docstring") OT::DistributionImplementation::computeSequentialConditionalPDF
@@ -427,6 +433,8 @@ Parameters
 ----------
 p : sequence of float in :math:`[0,1]`, with size :math:`d`
     Values to be taken sequentially as the argument of the conditional quantile.
+ordering : sequence of int, optional
+    Permutation of :math:`[0,\\ldots,d-1]` specifying the variable order.
 
 Returns
 -------
@@ -444,7 +452,8 @@ The sequential conditional quantile function is defined by:
 where :math:`F^{-1}` is the quantile function and
 where :math:`x_1,\ldots,x_{j-1}` are defined recursively as :math:`x_1=F_1^{-1}(p_1)` and for :math:`2\leq j \leq d`,
 :math:`x_j=F_{X_j}^{-1}(p_j|X_1=x_1,\ldots,X_{j-1}=x_{j-1})`: the conditioning part is the set of already
-computed conditional quantiles.)RAW"
+computed conditional quantiles.
+When an *ordering* is given, the variables are processed in the specified order instead of the natural order.)RAW"
 %enddef
 %feature("docstring") OT::DistributionImplementation::computeSequentialConditionalQuantile
 OT_Distribution_computeSequentialConditionalQuantile_doc

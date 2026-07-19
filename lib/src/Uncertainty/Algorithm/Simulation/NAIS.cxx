@@ -393,8 +393,7 @@ UnsignedInteger NAIS::getStepsNumber() const
 
 
 // Accessor to naisResult_s
-
-NAISResult NAIS::getResult() const
+SimulationResult NAIS::getResult() const
 {
   return naisResult_;
 }

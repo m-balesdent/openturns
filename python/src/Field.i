@@ -8,8 +8,8 @@
 
 OTTypedInterfaceObjectHelper(Field)
 
+%copyctor OT::Field;
 %include openturns/Field.hxx
-
 
 %pythoncode %{
 def _Field__repr_html_(self):
@@ -22,11 +22,6 @@ Field._repr_html_ = _Field__repr_html_
 
 namespace OT {
 %extend Field {
-
-Field(const Field & other)
-{
-  return new OT::Field(other);
-}
 
 Point __getitem__ (SignedInteger index) const
 {
@@ -70,7 +65,7 @@ PyObject * __getitem__(PyObject * args) const {
       OT::ScopedPyObjectPointer intValue(PyObject_CallMethod(args, const_cast<char *>("__int__"), const_cast<char *>("()")));
       if (intValue.isNull())
         OT::handleException();
-      long index = PyInt_AsLong(intValue.get());
+      long index = PyLong_AsLong(intValue.get());
       if (index < 0)
         index += self->getSize();
       if (index < 0)
@@ -91,7 +86,7 @@ PyObject * __getitem__(PyObject * args) const {
 
   if (!PyArg_ParseTuple(args,(char *)"OO:Field___getitem__",&obj1,&obj2)) SWIG_fail;
 
-  if (OT::isAPython< OT::_PyInt_ >(obj1))
+  if (OT::isAPython< OT::_PyLong_ >(obj1))
   {
     ecode2 = SWIG_AsVal_unsigned_SS_long(obj1, &val2);
     if (!SWIG_IsOK(ecode2)) {
@@ -99,7 +94,7 @@ PyObject * __getitem__(PyObject * args) const {
     }
     arg2 = static_cast< OT::UnsignedInteger >(val2);
 
-    if (OT::isAPython< OT::_PyInt_ >(obj2))
+    if (OT::isAPython< OT::_PyLong_ >(obj2))
     {
       ecode3 = SWIG_AsVal_unsigned_SS_long(obj2, &val3);
       if (!SWIG_IsOK(ecode3)) {
@@ -115,7 +110,6 @@ fail:
   return NULL;
 }
 
-
 void __setitem__(PyObject * args, PyObject * valObj) {
 
   if (!PyTuple_Check(args))
@@ -126,7 +120,7 @@ void __setitem__(PyObject * args, PyObject * valObj) {
       OT::ScopedPyObjectPointer intValue(PyObject_CallMethod(args, const_cast<char *>("__int__"), const_cast<char *>("()")));
       if (intValue.isNull())
         OT::handleException();
-      long index = PyInt_AsLong(intValue.get());
+      long index = PyLong_AsLong(intValue.get());
       if (index < 0)
         index += self->getSize();
       if (index < 0)
@@ -165,4 +159,3 @@ fail:
 } // Field
 
 } // OT
-

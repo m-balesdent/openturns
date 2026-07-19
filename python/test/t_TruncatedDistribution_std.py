@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import openturns as ot
+import openturns.experimental as otexp
 import openturns.testing as ott
 import math as m
 
@@ -293,6 +294,16 @@ ott.assert_almost_equal(
         ],
     ),
 )
+# MultivariateUniform truncation simplification
+mvu = otexp.MultivariateUniform([0.0, 1.0], [2.0, 3.0])
+truncMvu = ot.TruncatedDistribution(
+    mvu, ot.Interval([0.5, 1.5], [1.5, 2.5])
+)
+simplified = truncMvu.getSimplifiedVersion()
+assert "MultivariateUniform" in str(simplified.getClassName)
+ott.assert_almost_equal(simplified.getRange().getLowerBound(), [0.5, 1.5])
+ott.assert_almost_equal(simplified.getRange().getUpperBound(), [1.5, 2.5])
+
 # check simplification logic only checks numerical range
 dist = ot.Gumbel(1.0, 0.0)
 numericalRange = ot.Interval(
@@ -308,3 +319,40 @@ trunc_w = ot.TruncatedDistribution(weibull, ot.Interval(-10.0, 10.0))
 point_out = [-5.0]  # inside bounds_, outside getRange()
 ott.assert_almost_equal(trunc_w.computePDFGradient(point_out), [0.0] * 5)
 ott.assert_almost_equal(trunc_w.computeCDFGradient(point_out), [0.0] * 5)
+
+# getMarginal must preserve variable descriptions
+sample = ot.Sample(
+    [
+        [-90.0, 42.0, 1.0, 2.0],
+        [-89.0, 43.0, 1.1, 2.1],
+        [-88.0, 44.0, 0.9, 1.9],
+        [-87.0, 45.0, 1.2, 2.2],
+    ]
+)
+sample.setDescription(["a1", "a3", "P1", "Q"])
+prior = ot.JointDistribution(
+    [
+        ot.Uniform(-100.0, -80.0),
+        ot.Uniform(35.0, 50.0),
+        ot.Uniform(0.0, 2.0),
+        ot.Uniform(1.0, 3.0),
+    ]
+)
+prior.setDescription(sample.getDescription())
+distribution = ot.KernelSmoothing().build(sample)
+truncated = ot.TruncatedDistribution(distribution, prior.getRange())
+marginal = truncated.getMarginal([0, 1])
+assert marginal.getDescription() == ["a1", "a3"], f"Got {list(marginal.getDescription())}"
+
+# Test computeSequentialConditional* with custom ordering
+td = ot.TruncatedDistribution(ot.Normal(2), ot.Interval([-1.0] * 2, [1.0] * 2))
+x = ot.Point([0.5, 0.5])
+ordering = [0, 1]
+# Identity ordering should match 1-arg version
+ott.assert_almost_equal(td.computeSequentialConditionalCDF(x, ordering), td.computeSequentialConditionalCDF(x), 1e-5, 1e-5)
+ott.assert_almost_equal(td.computeSequentialConditionalPDF(x, ordering), td.computeSequentialConditionalPDF(x), 1e-5, 1e-5)
+ott.assert_almost_equal(td.computeSequentialConditionalQuantile(ot.Point([0.3, 0.7]), ordering), td.computeSequentialConditionalQuantile(ot.Point([0.3, 0.7])), 1e-5, 1e-5)
+# Reversed ordering
+x_rev = ot.Point([x[1], x[0]])
+r_cdf = td.computeSequentialConditionalCDF(x_rev, [1, 0])
+ott.assert_almost_equal(r_cdf, [td.computeSequentialConditionalCDF(x)[1], td.computeSequentialConditionalCDF(x_rev)[1]], 1e-4, 1e-4)

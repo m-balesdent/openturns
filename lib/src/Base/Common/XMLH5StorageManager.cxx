@@ -86,14 +86,24 @@ template <> inline std::vector<UnsignedInteger> & XMLH5StorageManagerImplementat
   return valBuf_UnsignedInteger_;
 }
 
-template <class CPP_Type> inline H5::DataType getDataType();
-template <> inline H5::DataType getDataType<Scalar>()
+template <class CPP_Type> inline H5::DataType getMemoryDataType();
+template <> inline H5::DataType getMemoryDataType<Scalar>()
+{
+  return H5::PredType::NATIVE_DOUBLE;
+}
+template <> inline H5::DataType getMemoryDataType<UnsignedInteger>()
+{
+  return H5::PredType::NATIVE_ULONG;
+}
+
+template <class CPP_Type> inline H5::DataType getFileDataType();
+template <> inline H5::DataType getFileDataType<Scalar>()
 {
   return H5::PredType::IEEE_F64LE;
 }
-template <> inline H5::DataType getDataType<UnsignedInteger>()
+template <> inline H5::DataType getFileDataType<UnsignedInteger>()
 {
-  return H5::PredType::NATIVE_ULONG;
+  return H5::PredType::STD_U64LE;
 }
 
 
@@ -170,16 +180,18 @@ void XMLH5StorageManagerImplementation::writeToH5(const String & dataSetName)
     }
     //Set dataspace to unlimited if full buffer
     else
+    {
       dsp = H5::DataSpace(1, dims, maxdims);
-    //Propagate dataspace properties to dataset
-    prop.setChunk(1, dims);
-
-    // enable compression
-    prop.setDeflate(compressionLevel_);
+      //Propagate dataspace properties to dataset
+      prop.setChunk(1, dims);
+      // enable compression
+      if (compressionLevel_ > 0)
+        prop.setDeflate(compressionLevel_);
+    }
 
     //Create new dataset and write it
-    H5::DataSet dset(h5File_.createDataSet(dataSetName, getDataType<CPP_Type>(), dsp, prop));
-    dset.write(getBuffer<CPP_Type>().data(), getDataType<CPP_Type>());
+    H5::DataSet dset(h5File_.createDataSet(dataSetName, getFileDataType<CPP_Type>(), dsp, prop));
+    dset.write(getBuffer<CPP_Type>().data(), getMemoryDataType<CPP_Type>());
     prop.close();
   }
   else
@@ -197,7 +209,7 @@ void XMLH5StorageManagerImplementation::writeToH5(const String & dataSetName)
     //Create space for new data
     H5::DataSpace memspace(1, dims, NULL);
     //Write new data
-    dset.write(getBuffer<CPP_Type>().data(), getDataType<CPP_Type>(), memspace, filespace);
+    dset.write(getBuffer<CPP_Type>().data(), getMemoryDataType<CPP_Type>(), memspace, filespace);
   }
   getBuffer<CPP_Type>().clear();
   h5File_.close();
@@ -219,6 +231,7 @@ void XMLH5StorageManagerImplementation::readIndexedValue(Pointer<StorageManager:
     readFromH5<CPP_Type>(dataSetName);
     state.reachedEnd_ = false;
   }
+  if (getBuffer<CPP_Type>().size() == 0) return;
   if (index == getBuffer<CPP_Type>().size() - 1)
   {
     state.reachedEnd_ = true;
@@ -252,10 +265,10 @@ void XMLH5StorageManagerImplementation::readFromH5(const String & dataSetName)
 
   H5::DataSet dataset = h5File_.openDataSet(dataSetName.c_str());
   H5::DataSpace dataspace = dataset.getSpace();
-  const int size = dataspace.getSimpleExtentNpoints();
+  const hsize_t size = dataspace.getSimpleExtentNpoints();
 
   getBuffer<CPP_Type>().resize(size);
-  dataset.read(getBuffer<CPP_Type>().data(), getDataType<CPP_Type>());
+  dataset.read(getBuffer<CPP_Type>().data(), getMemoryDataType<CPP_Type>());
 
   dataspace.close();
   dataset.close();
