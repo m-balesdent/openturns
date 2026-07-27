@@ -284,7 +284,8 @@ active_learning_subset = ot.ActiveLearningReliabilityAlgorithm(
 # We stop the algorithm if the difference between
 # the probability estimated using  :math:`\hat{g}(\vect{X}) + k \widehat{\sigma}(\vect{X})` and the probability estimated using
 # :math:`\hat{g}(\vect{X}) - k \widehat{\sigma}(\vect{X})` is below a given threshold.
-# Mathematically, the stopping criterion is math:`\frac{|\Prob{(\widehat{g}(\vect{X}) + k \widehat{\sigma}(\vect{X})<0.) - \Prob{(\widehat{g}(\vect{X}) - k \widehat{\sigma}(\vect{X})<0.)|}{P(\widehat{g}(\vect{X}))} \leq \epsilon`. In this example, we choose :math:`k = 2` and :math:`\epsilon = 0.05`
+# Mathematically, the stopping criterion is math:`\frac{|\Prob{(\widehat{g}(\vect{X}) + k \widehat{\sigma}(\vect{X})<0.) - \Prob{(\widehat{g}(\vect{X}) - k \widehat{\sigma}(\vect{X})<0.)|}{P(\widehat{g}(\vect{X}))} \leq \epsilon`.
+# In this example, we choose :math:`k = 2` and :math:`\epsilon = 0.05`
 convergence_criterion = active_learning_subset.PROBABILITY_UNCERTAINTY
 active_learning_subset.setConvergenceUncertaintyFactor(2.0)
 active_learning_subset.setConvergenceCriterionThreshold(0.2)
