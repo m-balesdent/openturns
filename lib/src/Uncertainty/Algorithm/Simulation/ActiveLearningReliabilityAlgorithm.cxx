@@ -537,7 +537,11 @@ void ActiveLearningReliabilityAlgorithm::run()
           ScalarCollection reliabilityIndexEstimate = reliabilityIndexHistory_.select(index);
 
           convergenceStatus = checkConvergenceStability(reliabilityIndexEstimate[0], reliabilityIndexEstimate[1]);
-        } 
+        }
+       else if (convergenceCriterion_ > 4)
+       {
+        throw OT::OutOfBoundException(HERE) << "convergenceCriterion_ should be in [-" << 0 << ", " << 4 << "]." ;
+       }
       }
 
       // Add infill sample if convergence is not reached

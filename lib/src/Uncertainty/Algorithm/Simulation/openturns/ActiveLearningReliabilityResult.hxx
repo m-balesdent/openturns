@@ -106,12 +106,12 @@ public:
   
 protected:
 
-  // Gaussian Process Regressor
-  GaussianProcessRegressionResult gprResult_;
-
   // Probability of failure and reliability index
   Scalar probabilityEstimate_;
   Scalar reliabilityIndex_;
+  
+  // Gaussian Process Regressor
+  GaussianProcessRegressionResult gprResult_;
 
   // Probability and reliability index histories
   Collection<Scalar> probabilityHistory_;
