@@ -75,8 +75,10 @@ Point ActiveLearningReliabilityFunction::operator()(const Point & x) const
 }
 
   
-Sample ActiveLearningReliabilityFunction::operator()(const Sample & inputSample, const Sample & inputDoE) const 
+Sample ActiveLearningReliabilityFunction::operator()(const Sample & inputSample, const Sample & ) const 
 {
+
+
   const UnsignedInteger size = inputSample.getSize();
   // avoid creating size points
   Point inputSample_i(inputSample.getDimension());
