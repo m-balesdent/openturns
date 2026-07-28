@@ -428,7 +428,7 @@ void ActiveLearningReliabilityAlgorithm::setSimulationAlgorithmSeed(const Unsign
   simulationAlgorithmSeed_ = seed;
 }
   
-UnsignedInteger ActiveLearningReliabilityAlgorithm::getSimulationAlgorithmSeed(const UnsignedInteger seed) const 
+UnsignedInteger ActiveLearningReliabilityAlgorithm::getSimulationAlgorithmSeed() const 
 {
   return simulationAlgorithmSeed_;
 }
