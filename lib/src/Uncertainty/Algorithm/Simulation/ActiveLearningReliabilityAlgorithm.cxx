@@ -448,8 +448,6 @@ void ActiveLearningReliabilityAlgorithm::run()
 {
   const Distribution inputDistribution = defaultEvent_.getImplementation()->getAntecedent().getDistribution();
   const Function model(defaultEvent_.getFunction());
-  UnsignedInteger size = inputDoE_.getSize();
-
   
   Bool convergenceStatus = false;
   
@@ -525,7 +523,7 @@ void ActiveLearningReliabilityAlgorithm::run()
           convergenceStatus = checkConvergenceStability(probabilityEstimate[0], probabilityEstimate[1]);
         }
       }
-      else if (convergenceCriterion_ = 4)
+      else if (convergenceCriterion_ == 4)
       {
         UnsignedInteger historySize = probabilityHistory_.getSize();
         if (historySize > 1)
@@ -540,7 +538,7 @@ void ActiveLearningReliabilityAlgorithm::run()
         }
        else if (convergenceCriterion_ > 4)
        {
-        throw OT::OutOfBoundException(HERE) << "convergenceCriterion_ should be in [-" << 0 << ", " << 4 << "]." ;
+         throw OT::OutOfBoundException(HERE) << "convergenceCriterion_ should be in [-" << 0 << ", " << 4 << "]." ;
        }
       }
 
