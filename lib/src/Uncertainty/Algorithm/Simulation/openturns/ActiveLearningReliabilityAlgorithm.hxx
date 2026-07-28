@@ -103,7 +103,7 @@ public:
 
   void setSimulationAlgorithmSeed(const UnsignedInteger seed);
   
-  UnsignedInteger getSimulationAlgorithmSeed(const UnsignedInteger seed) const;    
+  UnsignedInteger getSimulationAlgorithmSeed() const;    
   
   Pointer<EventSimulation> getSimulationAlgorithm() const;
   
