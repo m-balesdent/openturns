@@ -71,9 +71,9 @@ String ActiveLearningGMMFunction::__repr__() const
 
 
 /* Compute U criterion for one sample */
-Scalar ActiveLearningGMMFunction::computeAsScalar(const Point & x) const
+Scalar ActiveLearningGMMFunction::computeAsScalar(const Point &) const
 {
-  throw NotYetImplementedException(HERE) << "In ActiveLearningGMMFunction::computeAsScalar(const Point & x)";
+  throw NotYetImplementedException(HERE) << "In ActiveLearningGMMFunction::computeAsScalar(const Point &)";
 }
 
 

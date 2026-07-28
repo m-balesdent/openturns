@@ -84,25 +84,27 @@ Sample ActiveLearningReliabilityFunction::operator()(const Sample & inputSample,
   for (UnsignedInteger i = 0; i < size; ++ i)
   {
     for (UnsignedInteger j = 0; j < inputSample_i.getSize(); ++ j)
+    {
       inputSample_i[j] = inputSample(i, j);
-      outS(i, 0) = computeAsScalar(inputSample_i);
+    } 
+    outS(i, 0) = computeAsScalar(inputSample_i);
   }
   return outS;
 }
 
-Scalar ActiveLearningReliabilityFunction::computeAsScalar(const Point & x) const
+Scalar ActiveLearningReliabilityFunction::computeAsScalar(const Point & ) const
 {
-  throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityFunction::computeAsScalar(const Point & x)";
+  throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityFunction::computeAsScalar(const Point & )";
 }
 
-Bool ActiveLearningReliabilityFunction::checkConvergenceLearning(const Sample & criterionValues) const
+Bool ActiveLearningReliabilityFunction::checkConvergenceLearning(const Sample &) const
 {
-  throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityFunction::checkConvergenceLearning(const Sample & criterionValues)";
+  throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityFunction::checkConvergenceLearning(const Sample &)";
 }
 
 /* Return sample corresponding to  criterion*/
-Sample ActiveLearningReliabilityFunction::getInfillSample(const Sample & inputSample,
-                                                          const Sample & criterionValues) const 
+Sample ActiveLearningReliabilityFunction::getInfillSample(const Sample &,
+                                                          const Sample &) const 
 {
   throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityFunction::findSampletoEvaluate(const Sample & inputSample, const Sample & criterionValues) "; 
 }
