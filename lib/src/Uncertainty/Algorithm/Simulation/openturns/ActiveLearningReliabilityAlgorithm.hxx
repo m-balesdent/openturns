@@ -84,7 +84,7 @@ public:
   /** Virtual constructor */
   ActiveLearningReliabilityAlgorithm * clone() const override;
 
-  void run();
+  void run() override;
 
   enum convergenceCriterion {PROBABILITY_UNCERTAINTY = 0,
                              RELIABILITY_INDEX_UNCERTAINTY = 1,
@@ -137,21 +137,20 @@ protected:
   Pointer<EventSimulation> p_simulationAlgorithm_;
   Pointer<ActiveLearningReliabilityFunction> p_activeLearningFunction;
   
-  GaussianProcessFitter defaultGPFitter_;
+
   Sample currentInputSample_;
   Sample inputDoE_;
   Sample outputDoE_;
-  UnsignedInteger convergenceCriterion_; // by default convergenceCriterion_ is set to active learning
-  
-  UnsignedInteger simulationAlgorithmSeed_;
-  
-  Scalar convergenceCriterionThreshold_;
-  Scalar convergenceUncertaintyFactor_;
-  
-  UnsignedInteger simulationBudget_;
+  GaussianProcessFitter defaultGPFitter_;
   UnsignedInteger functionCallNumber_;
   ScalarCollection probabilityHistory_;
   ScalarCollection reliabilityIndexHistory_;
+  UnsignedInteger convergenceCriterion_; // by default convergenceCriterion_ is set to active learning
+  UnsignedInteger simulationBudget_;
+  Scalar convergenceCriterionThreshold_;
+  
+  Scalar convergenceUncertaintyFactor_;
+  UnsignedInteger simulationAlgorithmSeed_;  
   
   ActiveLearningReliabilityResult activeLearningReliabilityResult_;
 

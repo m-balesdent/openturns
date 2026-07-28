@@ -212,7 +212,7 @@ public:
     return new GPWithUncertainty(*this);
   }
   // Interface obligatoire pour Function
-  Sample operator()(const Sample & x) const 
+  Sample operator()(const Sample & x) const override
   {
     // Calculation of mean
     const Sample mean = gprMetamodel_(x);
@@ -239,9 +239,9 @@ public:
   }
   
 protected:
-  Function gprMetamodel_;
   Scalar kFactor_;
   GaussianProcessConditionalCovariance gprCov_;
+  Function gprMetamodel_;
 };
 
 /* Check convergence based on probability uncertainty due to GP error */

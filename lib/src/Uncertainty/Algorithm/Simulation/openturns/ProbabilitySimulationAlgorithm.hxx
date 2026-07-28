@@ -59,7 +59,7 @@ public:
   void setKeepSample(const Bool keepSample) override;
 
   /** Input/output sample accessor according to select flag */
-  Sample getInputSample() const;
+  Sample getInputSample() const override;
   Sample getOutputSample() const;
 
   /** String converter */
