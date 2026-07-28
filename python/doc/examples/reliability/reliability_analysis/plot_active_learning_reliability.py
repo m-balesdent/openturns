@@ -284,7 +284,7 @@ active_learning_subset = ot.ActiveLearningReliabilityAlgorithm(
 # We stop the algorithm if the difference between
 # the probability estimated using  :math:`\hat{g}(\vect{X}) + k \widehat{\sigma}(\vect{X})` and the probability estimated using
 # :math:`\hat{g}(\vect{X}) - k \widehat{\sigma}(\vect{X})` is below a given threshold.
-# Mathematically, the stopping criterion is given by 
+# Mathematically, the stopping criterion is given by
 #
 # .. math::
 #   \begin{align*}
@@ -340,7 +340,9 @@ metamodel_IsoLines_subset = metamodel_subset.draw([-5] * 2, [5] * 2, [128] * 2)
 dr_metamodel_subset = metamodel_IsoLines_subset.getDrawable(0)
 dr_metamodel_subset.setLevels([threshold])
 dr_metamodel_subset.setLineStyle("dashed")
-dr_metamodel_subset.setLegend("Limit state - metamodel obtained with Subset sampling and GMM")
+dr_metamodel_subset.setLegend(
+    "Limit state - metamodel obtained with Subset sampling and GMM"
+)
 dr_metamodel_subset.setColor("green")
 dr_metamodel_subset.setLineWidth(1)
 graph.add(dr_metamodel_subset)
