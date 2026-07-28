@@ -162,8 +162,6 @@ Point NAIS::computeWeights(const Sample & sample,
 // Main function that computes the failure probability
 void NAIS::run()
 {
-  std::cout<<"-------------inside NAIS beginning of run-------------"<<std::endl;
-    std::cout<<naisResult_<<std::endl;
   // First, initialize some parameters
   inputSample_.clear();
   outputSample_.clear();
@@ -330,12 +328,6 @@ void NAIS::run()
   naisResult_.setOuterSampling(getMaximumOuterSampling() * numberOfSteps_);
   naisResult_.setBlockSize(getBlockSize());
   naisResult_.setVarianceEstimate(varianceEstimate);
-  
-  std::cout<<"--------- Results inside NAIS --------"<<std::endl;
-
-  std::cout<<naisResult_<<std::endl;
-  std::cout<<result_<<std::endl;
-  std::cout<<"--------- End / Results inside NAIS --------"<<std::endl;  
 
 }
 
