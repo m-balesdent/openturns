@@ -104,7 +104,7 @@ event = ot.ThresholdEvent(Y, ot.Less(), threshold)
 # Evaluate the probability with various active learning algorithms
 # ----------------------------------------------------------------
 # In order to specify an active learning algorithm, we need to build the main ingredients of such an algorithm:
-# the instanciated simulation algorithm we want to use, the Gaussian Process fitter, and the active learning criterion.
+# the instantiated simulation algorithm we want to use, the Gaussian Process fitter, and the active learning criterion.
 
 # %%
 # Definition of Gaussian Process fitter
