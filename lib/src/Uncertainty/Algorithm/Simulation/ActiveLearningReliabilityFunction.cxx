@@ -75,7 +75,7 @@ Point ActiveLearningReliabilityFunction::operator()(const Point & x) const
 }
 
   
-Sample ActiveLearningReliabilityFunction::operator()(const Sample & inputSample, const Sample & ) const 
+Sample ActiveLearningReliabilityFunction::operator()(const Sample & inputSample, const Sample & inputDoE) const 
 {
 
 
