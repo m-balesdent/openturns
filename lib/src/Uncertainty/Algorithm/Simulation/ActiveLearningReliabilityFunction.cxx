@@ -84,7 +84,7 @@ Field ActiveLearningReliabilityFunction::operator()(const OT::Field&) const
   throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityFunction::operator()(const OT::Field&)";
 }
   
-Sample ActiveLearningReliabilityFunction::operator()(const Sample & inputSample, const Sample & inputDoE) const 
+Sample ActiveLearningReliabilityFunction::operator()(const Sample & inputSample, const Sample &) const 
 {
 
 

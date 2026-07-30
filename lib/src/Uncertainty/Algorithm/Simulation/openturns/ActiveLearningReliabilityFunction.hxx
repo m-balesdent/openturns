@@ -68,7 +68,7 @@ public:
   /** String converter */
   String __repr__() const override;
   
-  virtual Sample operator()(const Sample & inputSample, const Sample & inputDoE) const; 
+  virtual Sample operator()(const Sample & inputSample, const Sample &) const; 
   
   /* return infill Sample */
   virtual Sample getInfillSample(const Sample & inputSample,
