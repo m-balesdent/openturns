@@ -74,6 +74,15 @@ Point ActiveLearningReliabilityFunction::operator()(const Point & x) const
   return Point(1, computeAsScalar(x));
 }
 
+Sample ActiveLearningReliabilityFunction::operator()(const OT::Sample&) const 
+{
+  throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityFunction::operator()(const OT::Sample&)";
+}
+
+Field ActiveLearningReliabilityFunction::operator()(const OT::Field&) const 
+{
+  throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityFunction::operator()(const OT::Field&)";
+}
   
 Sample ActiveLearningReliabilityFunction::operator()(const Sample & inputSample, const Sample & inputDoE) const 
 {

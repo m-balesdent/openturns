@@ -81,7 +81,9 @@ protected:
   virtual Scalar computeAsScalar(const Point & x) const;
 
   Point operator()(const Point & x) const override;
-
+  Sample operator()(const Sample & x) const override;
+  Field operator()(const Field & x) const override;
+  
   Scalar reliabilityThreshold_;
   Scalar learningThreshold_;
   GaussianProcessRegressionResult gprResult_;
