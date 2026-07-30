@@ -49,12 +49,6 @@ public:
                                     const Scalar learningThreshold);
                                     
                                     
-  /*ActiveLearningReliabilityFunction(const Scalar reliabilityThreshold,
-                                    const GaussianProcessRegressionResult & gprResult,
-                                    const Scalar learningThreshold,
-                                    const Distribution & inputDistribution,
-                                    const Scalar outputQuantileLevel);*/
-                                                                                                                   
   /** Virtual constructor */
   ActiveLearningReliabilityFunction * clone() const override;
     

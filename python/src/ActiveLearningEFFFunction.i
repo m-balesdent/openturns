@@ -4,7 +4,7 @@
 #include "openturns/ActiveLearningEFFFunction.hxx"
 %}
 
-//%include NAIS_doc.i
+%include ActiveLearningEFFFunction_doc.i
 
 %copyctor OT::ActiveLearningEFFFunction;
 

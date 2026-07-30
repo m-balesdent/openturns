@@ -4,7 +4,7 @@
 #include "openturns/ActiveLearningGMMFunction.hxx"
 %}
 
-//%include NAIS_doc.i
+%include ActiveLearningGMMFunction_doc.i
 
 %copyctor OT::ActiveLearningGMMFunction;
 

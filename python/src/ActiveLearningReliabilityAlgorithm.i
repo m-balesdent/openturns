@@ -4,7 +4,7 @@
 #include "openturns/ActiveLearningReliabilityAlgorithm.hxx"
 %}
 
-//%include NAIS_doc.i
+%include ActiveLearningReliabilityAlgorithm_doc.i
 
 %copyctor OT::ActiveLearningReliabilityAlgorithm;
 

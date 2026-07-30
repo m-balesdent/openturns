@@ -4,7 +4,7 @@
 #include "openturns/ActiveLearningReliabilityResult.hxx"
 %}
 
-//%include NAIS_doc.i
+%include ActiveLearningReliabilityResult_doc.i
 
 %copyctor OT::ActiveLearningReliabilityResult;
 
