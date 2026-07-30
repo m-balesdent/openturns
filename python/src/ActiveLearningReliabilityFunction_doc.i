@@ -68,7 +68,7 @@ candidateSample : :class:`~openturns.Sample`
 Returns
 -------
 convergenceIndicator : Bool
-    Indicator of convergence. The convergence is assumed if the infill values obtained for each candidate sample fullfill the convergence test (according to the learning threshold).
+    Indicator of convergence. The convergence is assumed if the infill values obtained for each candidate sample fulfill the convergence test (according to the learning threshold).
 "
 
 // ---------------------------------------------------------------------------
