@@ -56,7 +56,7 @@ Simulation algorithm
     ActiveLearningEFFFunction
     ActiveLearningReliabilityAlgorithm
     ActiveLearningReliabilityResult
-    
+
 Directional Sampling
 ====================
 
