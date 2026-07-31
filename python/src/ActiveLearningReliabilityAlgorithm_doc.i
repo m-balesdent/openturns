@@ -50,7 +50,7 @@ convergenceCriterionThreshold : Scalar
 
 Notes
 -----
-This unique accessor allows to define the threshold to check convergence in case `PROBABILITY_UNCERTAINTY`, `RELIABILITY_INDEX_UNCERTAINTY`,
+This unique accessor allows one to define the threshold to check convergence in case `PROBABILITY_UNCERTAINTY`, `RELIABILITY_INDEX_UNCERTAINTY`,
 `PROBABILITY_STABILITY` or `RELIABILITY_INDEX_STABILITY` are selected in method `setConvergenceCriterion`
 "
 
