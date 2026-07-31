@@ -3,7 +3,7 @@
 
 See also
 --------
-ActiveLearningReliabilityAlgorithm"
+ActiveLearningReliabilityAlgorithm
 "
 
 // ---------------------------------------------------------------------------
@@ -165,4 +165,3 @@ Parameters
 reliabilityIndexCI : :class:`~openturns.Interval`
    Confidence index interval of reliability index estimate, defined by `convergenceUncertaintyFactor`
 "
-

@@ -72,7 +72,6 @@ convergenceIndicator : Bool
 "
 
 // ---------------------------------------------------------------------------
-
 %feature("docstring") OT::ActiveLearningReliabilityFunction::getInfillSample
 "Learning threshold accessor.
 
