@@ -52,7 +52,7 @@ reliabilityIndex : Scalar
 
 Returns
 -------
-gprResult : :class:`~openturns.GaussianProcessResult`
+gprResult : :class:`~openturns.GaussianProcessRegressionResult`
    Result of Gaussian process regressor used in active learning reliability algorithm
 "
 
@@ -62,7 +62,7 @@ gprResult : :class:`~openturns.GaussianProcessResult`
 
 Parameters
 ----------
-gprResult : :class:`~openturns.GaussianProcessResult`
+gprResult : :class:`~openturns.GaussianProcessRegressionResult`
    Result of Gaussian process regressor used in active learning reliability algorithm
 "
 
