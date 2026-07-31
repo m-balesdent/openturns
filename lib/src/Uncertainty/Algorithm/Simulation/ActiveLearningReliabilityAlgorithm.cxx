@@ -433,16 +433,6 @@ UnsignedInteger ActiveLearningReliabilityAlgorithm::getSimulationAlgorithmSeed()
   return simulationAlgorithmSeed_;
 }
 
-/*EventSimulation& ActiveLearningReliabilityAlgorithm::getSimulationAlgorithm() const
-{
-  return dynamic_cast<EventSimulation>(&p_simulationAlgorithm_);
-}*/
-
-/*Sample ActiveLearningReliabilityAlgorithm::getInputSample() const
-{
-  return inputDoE_;
-}*/
-
 /* Run of the algorithm */
 void ActiveLearningReliabilityAlgorithm::run()
 {

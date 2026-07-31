@@ -41,19 +41,17 @@ convergenceCriterion : int, optional
 "
 
 // ---------------------------------------------------------------------------
-%feature("docstring") OT::ActiveLearningReliabilityAlgorithm::getConvergenceCriterion
-"Accessor to convergence criterion.
+%feature("docstring") OT::ActiveLearningReliabilityAlgorithm::setConvergenceCriterionThreshold
+"Accessor to the convergence uncertainty threshold. This parameter is used to check the convergence (regarding probabiliy uncertainty, reliability index uncertainty, probability stability or reliability index stability.
+Parameters
+----------
+convergenceCriterionThreshold : Scalar
+   Threshold to check is active learning reliability algorithm has converged
 
-Returns
--------
-convergenceCriterion : int, optional
-    Selection flag:
-
-    - PROBABILITY_UNCERTAINTY : convergence based on the uncertainty of probability estimate due to the Gaussian process
-    - RELIABILITY_INDEX_UNCERTAINTY : convergence based on the uncertainty of reliability index estimate due to the Gaussian process
-    - ACTIVE_LEARNING : convergence based on the active learning
-    - PROBABILITY_STABILITY : convergence based on the stability of probability estimate between two active learning iterations
-    - RELIABILITY_INDEX_STABILITY : convergence based on the stability of probability estimate between two active learning iterations
+Notes
+-----
+This unique accessor allows to define the threshold to check convergence in case `PROBABILITY_UNCERTAINTY`, `RELIABILITY_INDEX_UNCERTAINTY`,
+`PROBABILITY_STABILITY` or `RELIABILITY_INDEX_STABILITY` are selected in method `setConvergenceCriterion`
 "
 
 // ---------------------------------------------------------------------------
@@ -61,23 +59,9 @@ convergenceCriterion : int, optional
 "Accessor to the convergence uncertainty factor. This parameter is used to determine the confidence interval of probability due to Gaussian process uncertainty.
 
 Parameters
-----------
-convergenceUncertaintyFactor : Scalar
-   convergence uncertainty factor
-
-Notes
------
-This parameter :math:`k` is used to determine the confidence interval of probability due to Gaussian process uncertainty. This term is a multiplicative factor of  the standard deviation of the Gaussian process to compute the confidence interval. Let consider :math:`\inputRV` the input random vector and :math:`T` the threshold defining the limit state of the reliability problem, and :math:`\hat{\model}(\cdot)` and :math:`\hat{\sigma}(\cdot)` respectively the mean and standard deviation of the conditioned Gaussian process used in the :class:`~openturns.ActiveLearningReliabilityAlgorithm`. The convergence uncertainty factor is used when the convergence criterion is equal to PROBABILITY_UNCERTAINTY and RELIABILITY_INDEX_UNCERTAINTY and computes the probability for :math:`\hat{\model}(\cdot)+/- k \hat{\sigma}(\cdot)` instead of :math:`\hat{\model}(\cdot)`
-"
-
-// ---------------------------------------------------------------------------
-%feature("docstring") OT::ActiveLearningReliabilityAlgorithm::getConvergenceCriterionThreshold
-"Accessor to the convergence uncertainty factor. This parameter is used to determine the confidence interval of probability due to Gaussian process uncertainty.
-
-Returns
 -------
 convergenceUncertaintyFactor : Scalar
-   convergence uncertainty factor
+   Convergence uncertainty factor
 
 Notes
 -----

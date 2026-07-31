@@ -105,8 +105,6 @@ public:
 
   UnsignedInteger getSimulationAlgorithmSeed() const;    
 
-  Pointer<EventSimulation> getSimulationAlgorithm() const;
-
   UnsignedInteger getFunctionCallNumber() const;
 
   Sample getInputDoE() const;
