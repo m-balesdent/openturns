@@ -18,7 +18,7 @@ Notes
 -----
 This class inherits from :class:`~openturns.ActiveLearningReliabilityFunction` and implements the calculation of the "U" function for reliability analysis.
 
-Let consider :math:`\inputRV` a sample of dimension :math:`\inputDim` that is returned by a reliability simulation algorithm, :math:`T` the threshold defining the limit state of the reliability problem, and :math:`hat{\model}(\cdot)` and :math:`hat{\sigma}(\cdot)` respectively the conditional mean and conditional standard deviation of the Gaussian Process Regressor used in the :class:`~openturns.ActiveLearningReliabilityAlgorithm`. 
+Let consider :math:`\inputRV` a sample of dimension :math:`\inputDim` that is returned by a reliability simulation algorithm, :math:`T` the threshold defining the limit state of the reliability problem, and :math:`hat{\model}(\cdot)` and :math:`hat{\sigma}(\cdot)` respectively the mean and standard deviation of the conditioned Gaussian process used in the :class:`~openturns.ActiveLearningReliabilityAlgorithm`. 
 
 
 The "U" function  :math:`U: \Rset^\inputDim \rightarrow \Rset^+` is defined as :
@@ -38,7 +38,7 @@ The sample that minimizes the "U" function will be selected for the refinement o
 Parameters
 ----------
 inputSample : :class:`~openturns.Point`
-    Gaussian Process Regressor Result
+    Point on which the infill criterion will be computed
     
 Returns
 -------

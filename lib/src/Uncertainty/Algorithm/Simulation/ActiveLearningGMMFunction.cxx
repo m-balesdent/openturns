@@ -171,7 +171,4 @@ Sample ActiveLearningGMMFunction::getInfillSample(const Sample & inputSample,
   return sampleToReturn;
 }
 
-
-  
-  
 END_NAMESPACE_OPENTURNS

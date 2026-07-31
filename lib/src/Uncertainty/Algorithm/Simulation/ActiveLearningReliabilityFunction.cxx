@@ -48,21 +48,6 @@ ActiveLearningReliabilityFunction::ActiveLearningReliabilityFunction(const Scala
     , learningThreshold_(learningThreshold)
 {
 }
-                                                                     
-/*ActiveLearningReliabilityFunction::ActiveLearningReliabilityFunction(const Scalar reliabilityThreshold,
-                                    const GaussianProcessRegressionResult & gprResult,
-                                    const Scalar learningThreshold,
-                                    const Distribution & inputDistribution,
-                                    const Scalar outputQuantileLevel)    
-    : EvaluationImplementation()
-    , reliabilityThreshold_(reliabilityThreshold)
-    , learningThreshold_(learningThreshold)
-    , gprResult_(gprResult)
-    , gprCov_(gprResult)
-{
-  throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityFunction(const Scalar reliabilityThreshold,const GaussianProcessRegressionResult & gprResult,const Distribution & inputDistribution,const Scalar learningThreshold)";
-}*/
-
 
 ActiveLearningReliabilityFunction * ActiveLearningReliabilityFunction::clone() const 
 {
