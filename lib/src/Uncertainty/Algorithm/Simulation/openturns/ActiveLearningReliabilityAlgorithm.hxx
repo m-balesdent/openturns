@@ -80,7 +80,7 @@ public:
                                       const PhysicalSpaceCrossEntropyImportanceSampling & reliabilityAlgorithm,
                                       const ActiveLearningReliabilityFunction & activelearningFunction,
                                       const UnsignedInteger SimulationBudget);
-                                      
+
   /** Virtual constructor */
   ActiveLearningReliabilityAlgorithm * clone() const override;
 
@@ -91,29 +91,28 @@ public:
                              ACTIVE_LEARNING = 2,
                              PROBABILITY_STABILITY = 3,
                              RELIABILITY_INDEX_STABILITY = 4};
-  
+
   // Accessor to convergence attributes
   void setConvergenceCriterion(const UnsignedInteger convergenceCriterion = PROBABILITY_UNCERTAINTY);
-  
+
   void setConvergenceUncertaintyFactor(const Scalar convergenceUncertaintyFactor);
-  
+
   void setConvergenceCriterionThreshold(const Scalar convergenceCriterionThreshold);
-  
+
   void setSimulationBudget(const UnsignedInteger simulationBudget);
 
   void setSimulationAlgorithmSeed(const UnsignedInteger seed);
-  
+
   UnsignedInteger getSimulationAlgorithmSeed() const;    
-  
+
   Pointer<EventSimulation> getSimulationAlgorithm() const;
-  
-  //EventSimulation & getSimulationAlgorithm() const;
+
   UnsignedInteger getFunctionCallNumber() const;
-  
+
   Sample getInputDoE() const;
-  
+
   Sample getOutputDoE() const;
-  
+
   /** Accessor to results */
   ActiveLearningReliabilityResult getResult() const;
     
@@ -121,7 +120,7 @@ protected:
 
   /** Accessor to results */
   void setResult(const ActiveLearningReliabilityResult & activeLearningReliabilityResult);
-  
+
   /** Convergence checks */
   Bool checkConvergenceProbabilityWithUncertainty();
 
@@ -129,14 +128,13 @@ protected:
 
   Bool checkConvergenceStability(const Scalar currentValue,
                                  const Scalar previousValue);
-  
+
   Point computeProbabilityWithUncertainty();                                                                                         
-  
+
   const RandomVector defaultEvent_;
   Pointer<EventSimulation> p_defaultSimulationAlgorithm_;
   Pointer<EventSimulation> p_simulationAlgorithm_;
   Pointer<ActiveLearningReliabilityFunction> p_activeLearningFunction;
-  
 
   Sample currentInputSample_;
   Sample inputDoE_;
@@ -148,15 +146,13 @@ protected:
   UnsignedInteger convergenceCriterion_; // by default convergenceCriterion_ is set to active learning
   UnsignedInteger simulationBudget_;
   Scalar convergenceCriterionThreshold_;
-  
-  Scalar convergenceUncertaintyFactor_;
-  UnsignedInteger simulationAlgorithmSeed_;  
-  
-  ActiveLearningReliabilityResult activeLearningReliabilityResult_;
 
+  Scalar convergenceUncertaintyFactor_;
+  UnsignedInteger simulationAlgorithmSeed_;
+
+  ActiveLearningReliabilityResult activeLearningReliabilityResult_;
 } ; /* class ActiveLearningReliabilityAlgorithm */
 
 END_NAMESPACE_OPENTURNS
-
 
 #endif /* OPENTURNS_ACTIVELEARNINGRELIABILITYALGORITHM_HXX */
