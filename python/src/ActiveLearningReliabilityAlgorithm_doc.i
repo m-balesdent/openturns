@@ -43,6 +43,7 @@ convergenceCriterion : int, optional
 // ---------------------------------------------------------------------------
 %feature("docstring") OT::ActiveLearningReliabilityAlgorithm::setConvergenceCriterionThreshold
 "Accessor to the convergence uncertainty threshold. This parameter is used to check the convergence (regarding probabiliy uncertainty, reliability index uncertainty, probability stability or reliability index stability.
+
 Parameters
 ----------
 convergenceCriterionThreshold : Scalar
@@ -59,7 +60,7 @@ This unique accessor allows one to define the threshold to check convergence in 
 "Accessor to the convergence uncertainty factor. This parameter is used to determine the confidence interval of probability due to Gaussian process uncertainty.
 
 Parameters
--------
+----------
 convergenceUncertaintyFactor : Scalar
    Convergence uncertainty factor
 
