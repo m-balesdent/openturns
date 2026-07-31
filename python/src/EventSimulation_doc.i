@@ -111,3 +111,23 @@ Returns
 -------
 graph : a :class:`~openturns.Graph`
     probability convergence graph"
+    
+// ---------------------------------------------------------------------
+%feature("docstring") OT::EventSimulation::setKeepSample
+"Accessor to keepSample parameter.
+
+Parameters
+----------
+keepSample : boolean
+    Keep sample indicator
+"
+
+// ---------------------------------------------------------------------
+%feature("docstring") OT::EventSimulation::getInputSample
+"Accessor to input sample.
+
+Returns
+-------
+inputSample : :class:`~openturns.Sample`
+    Input sample
+"

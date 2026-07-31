@@ -220,11 +220,10 @@ Sample EventSimulation::computeBlockSample()
   throw NotYetImplementedException(HERE) << "In EventSimulation::computeBlockSample()";
 }
 
-
 /** Setter keep sample */
 void EventSimulation::setKeepSample(const Bool) 
 {
-  throw NotYetImplementedException(HERE) << "In EventSimulation::csetKeepSample(Bool)";
+  throw NotYetImplementedException(HERE) << "In EventSimulation::setKeepSample(Bool)";
 } 
   
 /* Draw the probability convergence at the given level */
