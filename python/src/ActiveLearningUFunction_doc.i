@@ -25,19 +25,3 @@ Let consider :math:`\inputRV` a sample of dimension :math:`\inputDim` that is re
    U(\vect{x}) = \frac{|T - \hat{\model}(\vect{x})|}{\hat{\sigma}(\vect{x})}
 
 "
-
-// ---------------------------------------------------------------------------
-
-%feature("docstring") OT::ActiveLearningUFunction::computeAsScalar
-"Computation of the active learning criterion.
-
-Parameters
-----------
-inputSample : :class:`~openturns.Point`
-    Point on which the infill criterion will be computed
-    
-Returns
--------
-value : Scalar
-    Value of the U function for the considered sample.
-"
