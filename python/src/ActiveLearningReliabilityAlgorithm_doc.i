@@ -98,6 +98,18 @@ seed : int
    Seed of the random generator
 "
 
+
+// ---------------------------------------------------------------------------
+%feature("docstring") OT::ActiveLearningReliabilityAlgorithm::getSimulationAlgorithm
+"Accessor to simulation algorithm
+
+Returns
+-------
+simulationAlgorithm : pointer to the simulation algorithm. This is temporary
+   Simulation algorithm
+"
+
+
 // ---------------------------------------------------------------------------
 %feature("docstring") OT::ActiveLearningReliabilityAlgorithm::getFunctionCallNumber
 "Accessor to number of limit state function calls
