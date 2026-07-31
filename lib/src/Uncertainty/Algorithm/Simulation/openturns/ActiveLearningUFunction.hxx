@@ -35,9 +35,8 @@ BEGIN_NAMESPACE_OPENTURNS
 class OT_API ActiveLearningUFunction
   : public ActiveLearningReliabilityFunction
 {
-
   CLASSNAME
-  
+public:  
  /** Default constructor */
   ActiveLearningUFunction();
   
@@ -48,18 +47,20 @@ class OT_API ActiveLearningUFunction
   /** Virtual constructor */
   ActiveLearningUFunction * clone() const override;
 
-  /** Computation of active learning function */
-  Scalar computeAsScalar(const Point & inputSample) const override;
-  
-  /** Check convergence of learning */
-  Bool checkConvergenceLearning(const Sample  & criterionValues) const override;
-  
+
   /** String converter */
   String __repr__() const override;
   
   /* return infill Sample */
   Sample getInfillSample(const Sample & inputSample,
-                         const Sample & criterionValues) const override;
+                         const Sample & criterionValues) const override;         
+protected:                           
+  /** Computation of active learning function */
+  Scalar computeAsScalar(const Point & inputSample) const override;
+  
+  /** Check convergence of learning */
+  Bool checkConvergenceLearning(const Sample  & criterionValues) const override;
+
 } ; /* class ActiveLearningUFunction */
 
 END_NAMESPACE_OPENTURNS

@@ -37,7 +37,7 @@ class OT_API ActiveLearningEFFFunction
 {
 
   CLASSNAME
-  
+public:  
  /** Default constructor */
   ActiveLearningEFFFunction();
   
@@ -48,6 +48,11 @@ class OT_API ActiveLearningEFFFunction
   /** Virtual constructor */
   ActiveLearningEFFFunction * clone() const override;
 
+  
+  /** String converter */
+  String __repr__() const override;
+  
+protected :   
   /** Computation of active learning function */
   Scalar computeAsScalar(const Point & inputSample) const override;
   
@@ -58,9 +63,7 @@ class OT_API ActiveLearningEFFFunction
   virtual Sample getInfillSample(const Sample & inputSample,
                                  const Sample & criterionValues) const override;
                                       
-  
-  /** String converter */
-  String __repr__() const override;
+
   
 } ; /* class ActiveLearningEFFFunction */
 

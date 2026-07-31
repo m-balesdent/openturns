@@ -29,19 +29,3 @@ The "U" function  :math:`U: \Rset^\inputDim \rightarrow \Rset^+` is defined as :
 
 The sample that minimizes the "U" function will be selected for the refinement of the Gaussian Process Regressor.
 "
-
-// ---------------------------------------------------------------------------
-
-%feature("docstring") OT::ActiveLearningUFunction::computeAsScalar
-"Computation of the active learning criterion.
-
-Parameters
-----------
-inputSample : :class:`~openturns.Point`
-    Point on which the infill criterion will be computed
-    
-Returns
--------
-value : Scalar
-    Value of the U function for the considered sample.
-"

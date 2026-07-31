@@ -50,7 +50,15 @@ class OT_API ActiveLearningGMMFunction
                           
   /** Virtual constructor */
   ActiveLearningGMMFunction * clone() const override;
+  
+  /* return infill Sample */
+  Sample getInfillSample(const Sample & inputSample,
+                        const Sample & criterionValues) const override;  
 
+  /** String converter */
+  String __repr__() const override;
+
+protected :
   /** Computation of active learning function */
   Scalar computeAsScalar(const Point & inputSample) const override;
 
@@ -59,14 +67,7 @@ class OT_API ActiveLearningGMMFunction
       
   /** Check convergence of learning */
   Bool checkConvergenceLearning(const Sample  & criterionValues) const override;
-  
-  /** String converter */
-  String __repr__() const override;
-  
-  /* return infill Sample */
-  Sample getInfillSample(const Sample & inputSample,
-                         const Sample & criterionValues) const override;
-                  
+
   Distribution inputDistribution_;
   Scalar outputQuantileLevel_;
 } ; /* class ActiveLearningUFunction */
