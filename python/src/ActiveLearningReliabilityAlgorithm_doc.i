@@ -3,12 +3,18 @@
 
 Parameters
 ----------
-reliabilityThreshold : float
-    Reliability analysis threshold.
 
-learningThreshold : float
-    Threshold used to check the active learning convergence.
+gpFitter : :class:`~openturns.GaussianProcessFitter`
+    Gaussian process fitter (not trained)
+    
+simulationAlgorithm : probability simulation algorithm
+    Probability simulation algorithm
 
+activeLearningFunction : :class:`~ActiveLearningReliabilityFunction`
+    Active learning function
+
+simulationBudget : int
+    Maximal number of true function calls for active learning
 
 See also
 --------
@@ -57,7 +63,7 @@ This unique accessor allows one to define the threshold to check convergence in 
 
 // ---------------------------------------------------------------------------
 %feature("docstring") OT::ActiveLearningReliabilityAlgorithm::setConvergenceUncertaintyFactor
-"Accessor to the convergence uncertainty factor. This parameter is used to determine the confidence interval of probability due to Gaussian process uncertainty.
+"Accessor to the convergence uncertainty factor. This parameter is used to determine the confidence interval of probability due to Gaussian process uncertainty. The default value is set to the `ActiveLearningReliabilityAlgorithm-DefaultConvergenceUncertaintyFactor` entry from :class:`~openturns.ResourceMap`.
 
 Parameters
 ----------
@@ -71,7 +77,7 @@ This parameter :math:`k` is used to determine the confidence interval of probabi
 
 // ---------------------------------------------------------------------------
 %feature("docstring") OT::ActiveLearningReliabilityAlgorithm::setSimulationBudget
-"Accessor to maximal simulation budget
+"Accessor to maximal simulation budget.
 
 Parameters
 ----------
@@ -81,7 +87,7 @@ simulationBudget : int
 
 // ---------------------------------------------------------------------------
 %feature("docstring") OT::ActiveLearningReliabilityAlgorithm::setSimulationAlgorithmSeed
-"Accessor to random generator seed for the simulation algorithm
+"Accessor to random generator seed for the simulation algorithm. The default value is set to the `ActiveLearningReliabilityAlgorithm-DefaultSimulationAlgorithmSeed` entry from :class:`~openturns.ResourceMap`.
 
 Parameters
 ----------
@@ -91,7 +97,7 @@ seed : int
 
 // ---------------------------------------------------------------------------
 %feature("docstring") OT::ActiveLearningReliabilityAlgorithm::getSimulationAlgorithmSeed
-"Accessor to random generator seed for the simulation algorithm
+"Accessor to random generator seed for the simulation algorithm.
 
 Returns
 -------
@@ -102,7 +108,7 @@ seed : int
 
 // ---------------------------------------------------------------------------
 %feature("docstring") OT::ActiveLearningReliabilityAlgorithm::getSimulationAlgorithm
-"Accessor to simulation algorithm
+"Accessor to simulation algorithm.
 
 Returns
 -------
