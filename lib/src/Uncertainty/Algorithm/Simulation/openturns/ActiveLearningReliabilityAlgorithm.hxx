@@ -171,7 +171,7 @@ private :
   Scalar getMaximumStandardDeviation() const override;
 
   /** Block size accessor */
-  virtual void setBlockSize(const UnsignedInteger blockSize) override;
+  void setBlockSize(const UnsignedInteger blockSize) override;
   UnsignedInteger getBlockSize() const override;
   
 } ; /* class ActiveLearningReliabilityAlgorithm */
