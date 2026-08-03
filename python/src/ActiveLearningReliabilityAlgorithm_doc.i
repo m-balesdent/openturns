@@ -1,5 +1,5 @@
 %feature("docstring") OT::ActiveLearningReliabilityAlgorithm
-R"RAW("Active learning reliability algorithm.
+R"RAW(Active learning reliability algorithm.
 
 Parameters
 ----------
