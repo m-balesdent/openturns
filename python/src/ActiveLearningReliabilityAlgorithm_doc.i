@@ -1,5 +1,5 @@
 %feature("docstring") OT::ActiveLearningReliabilityAlgorithm
-"Active learning reliability algorithm.
+R"RAW("Active learning reliability algorithm.
 
 Parameters
 ----------
@@ -28,7 +28,7 @@ The principle is to evaluate candidate samples on an active learning (also known
 
 A ActiveLearningReliabilityFunction object can be created only through its derivative classes,
 :class:`~openturns.ActiveLearningUFunction`, :class:`~openturns.ActiveLearningEFFFunction` or :class:`~openturns.ActiveLearningGMMFunction`.
-"
+)RAW"
 
 // ---------------------------------------------------------------------------
 %feature("docstring") OT::ActiveLearningReliabilityAlgorithm::setConvergenceCriterion
@@ -132,6 +132,8 @@ functionCall : int
 "Accessor to Design of experiments input sample
 
 Returns
+Notes
+-----
 -------
 functionCall : :class:`~openturns.Sample`
    Design of experiments input sample
