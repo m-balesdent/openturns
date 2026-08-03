@@ -117,7 +117,7 @@ public:
   ActiveLearningReliabilityResult getResult() const;
     
 protected:
-
+  
   /** Accessor to results */
   void setResult(const ActiveLearningReliabilityResult & activeLearningReliabilityResult);
 
@@ -151,6 +151,29 @@ protected:
   UnsignedInteger simulationAlgorithmSeed_;
 
   ActiveLearningReliabilityResult activeLearningReliabilityResult_;
+
+private :
+
+  /** Maximum sample size accessor */
+  void setMaximumOuterSampling(const UnsignedInteger maximumOuterSampling);
+  UnsignedInteger getMaximumOuterSampling() const;
+
+  /** Maximum coefficient of variation accessor */
+  void setMaximumCoefficientOfVariation(const Scalar maximumCoefficientOfVariation);
+  Scalar getMaximumCoefficientOfVariation() const;
+  
+  /** Convergence strategy accessor */
+  void setConvergenceStrategy(const HistoryStrategy & convergenceStrategy);
+  HistoryStrategy getConvergenceStrategy() const;
+  
+  /** Maximum standard deviation accessor */
+  void setMaximumStandardDeviation(const Scalar maximumStandardDeviation);
+  Scalar getMaximumStandardDeviation() const;
+
+  /** Block size accessor */
+  virtual void setBlockSize(const UnsignedInteger blockSize);
+  UnsignedInteger getBlockSize() const;
+  
 } ; /* class ActiveLearningReliabilityAlgorithm */
 
 END_NAMESPACE_OPENTURNS
