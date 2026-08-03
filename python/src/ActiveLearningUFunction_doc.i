@@ -1,5 +1,5 @@
 %feature("docstring") OT::ActiveLearningUFunction
-"Active learning criterion for reliability analysis implementing the "U" function.
+R"RAW(Active learning criterion for reliability analysis implementing the "U" function.
 
 Parameters
 ----------
@@ -24,5 +24,5 @@ Let consider :math:`\inputRV` a sample of dimension :math:`\inputDim` that is re
 
    U(\vect{x}) = \frac{ \left| T - \widehat{\model}( \vect{x} ) \right| }{\widehat{\sigma}( \vect{x} )}
 
-"
+)RAW"
 

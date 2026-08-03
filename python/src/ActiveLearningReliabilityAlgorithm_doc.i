@@ -6,7 +6,7 @@ Parameters
 
 gpFitter : :class:`~openturns.GaussianProcessFitter`
     Gaussian process fitter (not trained)
-    
+
 simulationAlgorithm : probability simulation algorithm
     Probability simulation algorithm
 
@@ -72,7 +72,7 @@ convergenceUncertaintyFactor : Scalar
 
 Notes
 -----
-This parameter :math:`k` is used to determine the confidence interval of probability due to Gaussian process uncertainty. This term is a multiplicative factor of  the standard deviation of the Gaussian process to compute the confidence interval. Let consider :math:`\inputRV` the input random vector and :math:`T` the threshold defining the limit state of the reliability problem, and :math:`\hat{\model}(\cdot)` and :math:`\hat{\sigma}(\cdot)` respectively the mean and standard deviation of the conditioned Gaussian process used in the :class:`~openturns.ActiveLearningReliabilityAlgorithm`. The convergence uncertainty factor is used when the convergence criterion is equal to PROBABILITY_UNCERTAINTY and RELIABILITY_INDEX_UNCERTAINTY and computes the probability for :math:`\hat{\model}(\cdot)+/- k \hat{\sigma}(\cdot)` instead of :math:`\hat{\model}(\cdot)`
+This parameter :math:`k` is used to determine the confidence interval of probability due to Gaussian process uncertainty. This term is a multiplicative factor of  the standard deviation of the Gaussian process to compute the confidence interval. Let consider :math:`\inputRV` the input random vector and :math:`T` the threshold defining the limit state of the reliability problem, and :math:`\hat{\model}(\cdot)` and :math:`\hat{\sigma}(\cdot)` respectively the mean and standard deviation of the conditioned Gaussian process used in the :class:`~openturns.ActiveLearningReliabilityAlgorithm`. The convergence uncertainty factor is used when the convergence criterion is equal to `PROBABILITY_UNCERTAINTY` and `RELIABILITY_INDEX_UNCERTAINTY` and computes the probability for :math:`\hat{\model}(\cdot)+/- k \hat{\sigma}(\cdot)` instead of :math:`\hat{\model}(\cdot)`
 "
 
 // ---------------------------------------------------------------------------
@@ -132,11 +132,9 @@ functionCall : int
 "Accessor to Design of experiments input sample
 
 Returns
-Notes
------
 -------
 functionCall : :class:`~openturns.Sample`
-   Design of experiments input sample
+   Design of experiments, input sample
 "
 
 // ---------------------------------------------------------------------------
@@ -146,7 +144,7 @@ functionCall : :class:`~openturns.Sample`
 Returns
 -------
 functionCall : :class:`~openturns.Sample`
-   Design of experiments output sample
+   Design of experiments, output sample
 "
 
 // ---------------------------------------------------------------------------
