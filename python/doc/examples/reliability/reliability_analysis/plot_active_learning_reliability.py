@@ -288,7 +288,7 @@ active_learning_subset = ot.ActiveLearningReliabilityAlgorithm(
 #
 # .. math::
 #   \begin{align*}
-#   \frac{|\Prob{\widehat{g}(\vect{X}) + k \widehat{\sigma}(\vect{X})\leq 0} - \Prob{\widehat{g}(\vect{X}) - k \widehat{\sigma}(\vect{X})\leq 0}|}{\Prob{\widehat{g}(\vect{X})\leq 0} \leq \epsilon.
+#   \frac{|\Prob{\widehat{g}(\vect{X}) + k \widehat{\sigma}(\vect{X})\leq 0} - \Prob{\widehat{g}(\vect{X}) - k \widehat{\sigma}(\vect{X})\leq 0}|}{\Prob{\widehat{g}(\vect{X})\leq 0}} \leq \epsilon.
 #   \end{align*}
 
 # In this example, we choose :math:`k = 2` and :math:`\epsilon = 0.2`.
