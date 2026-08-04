@@ -172,7 +172,7 @@ private :
 
   /** Block size accessor */
   void setBlockSize(const UnsignedInteger blockSize) override;
-  UnsignedInteger getBlockSize() const override;
+  UnsignedInteger getBlockSize() const;
   
 } ; /* class ActiveLearningReliabilityAlgorithm */
 
