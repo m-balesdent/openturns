@@ -435,7 +435,7 @@ UnsignedInteger ActiveLearningReliabilityAlgorithm::getSimulationAlgorithmSeed()
 
 
 /** Maximum sample size accessor */
-void ActiveLearningReliabilityAlgorithm::setMaximumOuterSampling(const UnsignedInteger maximumOuterSampling)
+void ActiveLearningReliabilityAlgorithm::setMaximumOuterSampling(const UnsignedInteger )
 {
   throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityAlgorithm::setMaximumOuterSampling(const UnsignedInteger maximumOuterSampling)";
 }
@@ -447,7 +447,7 @@ UnsignedInteger ActiveLearningReliabilityAlgorithm::getMaximumOuterSampling() co
 }
 
 /** Maximum coefficient of variation accessor */
-void ActiveLearningReliabilityAlgorithm::setMaximumCoefficientOfVariation(const Scalar maximumCoefficientOfVariation) 
+void ActiveLearningReliabilityAlgorithm::setMaximumCoefficientOfVariation(const Scalar ) 
 {
   throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityAlgorithm::setMaximumCoefficientOfVariation(const Scalar maximumCoefficientOfVariation)";
 }
@@ -458,7 +458,7 @@ Scalar ActiveLearningReliabilityAlgorithm::getMaximumCoefficientOfVariation() co
 }
   
 /** Convergence strategy accessor */
-void ActiveLearningReliabilityAlgorithm::setConvergenceStrategy(const HistoryStrategy & convergenceStrategy)
+void ActiveLearningReliabilityAlgorithm::setConvergenceStrategy(const HistoryStrategy & )
 {
   throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityAlgorithm::setConvergenceStrategy(const HistoryStrategy & convergenceStrategy)";
 }
@@ -469,7 +469,7 @@ HistoryStrategy ActiveLearningReliabilityAlgorithm::getConvergenceStrategy() con
 }
   
 /** Maximum standard deviation accessor */
-void ActiveLearningReliabilityAlgorithm::setMaximumStandardDeviation(const Scalar maximumStandardDeviation)
+void ActiveLearningReliabilityAlgorithm::setMaximumStandardDeviation(const Scalar )
 {
   throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityAlgorithm::setMaximumStandardDeviation(const Scalar maximumStandardDeviation)";
 }
@@ -479,7 +479,7 @@ Scalar ActiveLearningReliabilityAlgorithm::getMaximumStandardDeviation() const
 }
 
 /** Block size accessor */
-void ActiveLearningReliabilityAlgorithm::setBlockSize(const UnsignedInteger blockSize)
+void ActiveLearningReliabilityAlgorithm::setBlockSize(const UnsignedInteger )
 {
   throw NotYetImplementedException(HERE) << "In ActiveLearningReliabilityAlgorithm::setBlockSize(const UnsignedInteger blockSize)";
 }

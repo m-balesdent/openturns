@@ -155,24 +155,24 @@ protected:
 private :
 
   /** Maximum sample size accessor */
-  void setMaximumOuterSampling(const UnsignedInteger maximumOuterSampling) override;
-  UnsignedInteger getMaximumOuterSampling() const override;
+  void setMaximumOuterSampling(const UnsignedInteger maximumOuterSampling);
+  UnsignedInteger getMaximumOuterSampling() const;
 
   /** Maximum coefficient of variation accessor */
-  void setMaximumCoefficientOfVariation(const Scalar maximumCoefficientOfVariation) override;
-  Scalar getMaximumCoefficientOfVariation() const override;
+  void setMaximumCoefficientOfVariation(const Scalar maximumCoefficientOfVariation);
+  Scalar getMaximumCoefficientOfVariation() const;
   
   /** Convergence strategy accessor */
-  void setConvergenceStrategy(const HistoryStrategy & convergenceStrategy) override;
-  HistoryStrategy getConvergenceStrategy() const override;
+  void setConvergenceStrategy(const HistoryStrategy & convergenceStrategy);
+  HistoryStrategy getConvergenceStrategy() const;
   
   /** Maximum standard deviation accessor */
-  void setMaximumStandardDeviation(const Scalar maximumStandardDeviation) override;
-  Scalar getMaximumStandardDeviation() const override;
+  void setMaximumStandardDeviation(const Scalar maximumStandardDeviation);
+  Scalar getMaximumStandardDeviation() const;
 
   /** Block size accessor */
-  void setBlockSize(const UnsignedInteger blockSize) override;
-  UnsignedInteger getBlockSize() const override;
+  void setBlockSize(const UnsignedInteger blockSize);
+  UnsignedInteger getBlockSize() const;
   
 } ; /* class ActiveLearningReliabilityAlgorithm */
 
