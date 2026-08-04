@@ -17,7 +17,7 @@ Notes
 -----
 This class inherits from :class:`~openturns.ActiveLearningReliabilityFunction` and implements the calculation of the Expected Feasibility Function (EFF)  for reliability analysis. The sample that maximizes the EFF will be selected for the refinement of the Gaussian Process Regressor.
 
-Let consider :math:`\inputRV` a sample of dimension :math:`\inputDim` that is returned by a reliability simulation algorithm, :math:`T` the threshold defining the limit state of the reliability problem, and :math:`\widehat{\model}(\cdot)` and :math:`\widehat{\sigma}(\cdot)` respectively the mean and standard deviation of the conditioned Gaussian process used in the :class:`~openturns.ActiveLearningReliabilityAlgorithm`. The EFF function  :math:`EFF: \Rset^{\inputDim} \rightarrow \Rset^{+}` is defined as :
+Let consider :math:`\inputRV` a sample of dimension :math:`\inputDim` that is returned by a reliability simulation algorithm, :math:`T` the threshold defining the limit state of the reliability problem, and :math:`\widehat{\model}(\cdot)` and :math:`\widehat{\sigma}(\cdot)` respectively the mean and standard deviation of the conditioned Gaussian process used in the :class:`~openturns.ActiveLearningReliabilityAlgorithm`. The EFF function  :math:`EFF: \Rset^{\inputDim} \rightarrow \Rset` is defined as :
 
 .. math::
    :nowrap:
