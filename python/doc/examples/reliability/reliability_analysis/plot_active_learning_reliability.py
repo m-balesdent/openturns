@@ -13,7 +13,7 @@ Active learning algorithms for reliability analysis
 #
 # .. math::
 #   \begin{align*}
-#   g(\vect{X}) = \min \begin{pmatrix}3+0.1(x_1-x_2)^2-\frac{(x_1+x_2)}{\sqrt{2}}\\
+#   g(\vect{x}) = \min \begin{pmatrix}3+0.1(x_1-x_2)^2-\frac{(x_1+x_2)}{\sqrt{2}}\\
 #   3+0.1(x_1-x_2)^2+\frac{(x_1+x_2)}{\sqrt{2}}\\
 #   (x_1-x_2)+ \frac{6}{\sqrt{2}}\\
 #   (x_2-x_1)+ \frac{6}{\sqrt{2}}
@@ -288,7 +288,7 @@ active_learning_subset = ot.ActiveLearningReliabilityAlgorithm(
 #
 # .. math::
 #   \begin{align*}
-#   \frac{|\Prob{(\widehat{g}(\vect{X}) + k \widehat{\sigma}(\vect{X})<0.)} - \Prob{(\widehat{g}(\vect{X}) - k \widehat{\sigma}(\vect{X})<0.)}|}{P(\widehat{g}(\vect{X}))} \leq \epsilon.
+#   \frac{|\Prob{\widehat{g}(\vect{X}) + k \widehat{\sigma}(\vect{X})\leq 0} - \Prob{\widehat{g}(\vect{X}) - k \widehat{\sigma}(\vect{X})\leq 0}|}{\Prob{\widehat{g}(\vect{X})\leq 0} \leq \epsilon.
 #   \end{align*}
 
 # In this example, we choose :math:`k = 2` and :math:`\epsilon = 0.2`.
