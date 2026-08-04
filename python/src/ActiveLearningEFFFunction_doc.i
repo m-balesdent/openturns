@@ -21,13 +21,12 @@ Let consider :math:`\inputRV` a sample of dimension :math:`\inputDim` that is re
 
 .. math::
    \begin{align*}
-   EFF(\vect{x}) = & (\widehat{\model}(\vect{x}) - T) \left\[2 \Phi(\widehat{\model^{0}}(\vect{x})) - \Phi(\widehat{\model^{+}}(\vect{x})) - \Phi(\widehat{\model^{-}}(\vect{x}))\right\]\\
-                   & - \widehat{\sigma}(\vect{x}) \left\[2 \phi(\widehat{\model^{0}}(\vect{x})) - \phi(\widehat{\model^{+}}(\vect{x})) - \phi(\widehat{\model^{-}}(\vect{x}))\right\]\\
-                   & + \epsilon(\vect{x})\left\[ \Phi(\widehat{\model^{+}}(\vect{x})) - \Phi(\widehat{\model^{-}}(\vect{x}))\right]
+   EFF(\vect{x}) = & (\widehat{\model}(\vect{x}) - T) \left\[2 \Phi(\widehat{\model^{0}}(\vect{x}))-\Phi(\widehat{\model^{+}}(\vect{x}))-\Phi(\widehat{\model^{-}}(\vect{x}))\right\]\\
+                   & - \widehat{\sigma}(\vect{x}) \left\[2 \phi(\widehat{\model^{0}}(\vect{x}))-\phi(\widehat{\model^{+}}(\vect{x}))-\phi(\widehat{\model^{-}}(\vect{x}))\right\]\\
+                   & + \epsilon(\vect{x})\left\[ \Phi(\widehat{\model^{+}}(\vect{x}))-\Phi(\widehat{\model^{-}}(\vect{x}))\right]
    \end{align*}
    
-with  :math:`\epsilon(\vect{x}) = 2 \widehat{\sigma}(\vect{x})`, :math:`\widehat{\model^{0}}(\vect{x}) = \frac{T - \widehat{\model}(\vect{x}) }{\widehat{\sigma}(\vect{x})}`,
-    :math:`\widehat{\model^{+}}(\vect{x}) = \frac{T + \epsilon(\vect{x}) - \widehat{\model}(\vect{x}) }{\widehat{\sigma}(\vect{x})}` and :math:`\widehat{\model^{-}}(\vect{x}) = \frac{T - \epsilon(\vect{x}) - \widehat{\model}(\vect{x}) }{\widehat{\sigma}(\vect{x})}`. :math:`\Phi(\cdot)` and :math:`\phi(\cdot)` are respectively the CDF and PDF of the Normal distribution.
-
+with  :math:`\epsilon(\vect{x}) = 2 \widehat{\sigma}(\vect{x})`, :math:`\widehat{\model^{0}}(\vect{x}) = \frac{T-\widehat{\model}(\vect{x}) }{\widehat{\sigma}(\vect{x})}`,
+    :math:`\widehat{\model^{+}}(\vect{x}) = \frac{T+\epsilon(\vect{x})-\widehat{\model}(\vect{x})}{\widehat{\sigma}(\vect{x})}` and :math:`\widehat{\model^{-}}(\vect{x}) = \frac{T-\epsilon(\vect{x})-\widehat{\model}(\vect{x})}{\widehat{\sigma}(\vect{x})}`. :math:`\Phi(\cdot)` and :math:`\phi(\cdot)` are respectively the CDF and PDF of the Normal distribution.
 )RAW"
 
