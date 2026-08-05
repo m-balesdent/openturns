@@ -24,14 +24,13 @@ Analysis of active learning algorithms for reliability estimation
 # We use the :class:`~openturns.ProbabilitySimulationAlgorithm` using :class:`~openturns.MonteCarloExperiment` as the simulation algorithm.
 # For active learning, this algorithm is combined with :class:`~openturns.ActiveLearningUFunction`.
 # We propose to compare the two approaches (without and with active learning) with a global simulation budget of 40 samples.
-# For the active learning, 20 samples will be used to generate a first Design of Experiments and 20 other samples will be added using active learning.
+# For the active learning, 6 samples will be used to generate a first Design of Experiments and 34 other samples will be added using active learning.
 
 # %%
 # First, import the python modules:
 
 # %%
 import openturns as ot
-from openturns.usecases import ackley_function
 import openturns.viewer as otv
 import math as m
 
@@ -61,7 +60,6 @@ def ackley(X):
     f = -a * m.exp(-b * m.sqrt(sumOfSquared)) - m.exp(sumOfCos) + a + m.exp(1.0)
     return [f]
 
-
 g = ot.PythonFunction(2, 1, ackley)
 
 # %%
@@ -85,7 +83,7 @@ view = otv.View(graph)
 Y = ot.CompositeRandomVector(g, X)
 
 # %%
-# Create the event :math:`\{ Y = g(\vect{X}) \geq 10 \}`
+# Create the event :math:`\{ Y = g(\vect{X}) \geq 9 \}`
 # -----------------------------------------------------
 
 # %%
@@ -114,7 +112,7 @@ print(
 # %%
 # Definition of Design of Experiments
 # -----------------------------------
-# We generate a Design of Experiments of 40 samples for the simulation algorithm using the overall metamodel and we extract a Design of Experiments of 20 samples for active learning reliability.
+# We generate a Design of Experiments of 40 samples for the simulation algorithm using the overall metamodel and we extract a Design of Experiments of 6 samples for active learning.
 
 # %%
 lower_bound_DoE = -5.0
