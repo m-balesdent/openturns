@@ -5,10 +5,13 @@ Active learning algorithms for reliability analysis
 
 # %%
 #
-# The objective is to illustrate the behavior of active learning algorithms in the context of reliability analysis. These algorithms couple
-# a simulation algorithm (e.g., Monte-Carlo simulation, Importance Sampling, Subset Sampling), a Gaussian Process
-# and an active learning criterion to enrich the metamodel in a goal-oriented approach to efficiently estimate a probability of failure. For more details, please consult :class:`~openturns.ActiveLearningReliabilityAlgorithm`.
-# In this example, two cases are described. Firstly, :class:`~openturns.ProbabilitySimulationAlgorithm` using :class:`~openturns.MonteCarloExperiment` is combined with :class:`~openturns.ActiveLearningUFunction` as active learning criterion. Secondly, :class:`~openturns.SubsetSampling` is associated with :class:`~openturns.ActiveLearningGMMFunction`.
+# The objective is to illustrate the behavior of active learning algorithms in the context of reliability analysis.
+# These algorithms couple a simulation algorithm (e.g., Monte-Carlo simulation, Importance Sampling, Subset Sampling), a Gaussian Process
+# and an active learning criterion to enrich the metamodel in a goal-oriented approach to efficiently estimate a probability of failure.
+# For more details, please consult :class:`~openturns.ActiveLearningReliabilityAlgorithm`.
+# In this example, two cases are described.
+# Firstly, :class:`~openturns.ProbabilitySimulationAlgorithm` using :class:`~openturns.MonteCarloExperiment` is combined with :class:`~openturns.ActiveLearningUFunction` as active learning criterion.
+# Secondly, :class:`~openturns.SubsetSampling` is associated with :class:`~openturns.ActiveLearningGMMFunction`.
 #
 # We consider the four-branch function :math:`g : \mathbb{R}^2 \rightarrow \mathbb{R}` defined by:
 #
@@ -107,7 +110,7 @@ event = ot.ThresholdEvent(Y, ot.Less(), threshold)
 # %%
 # Evaluate the probability with various active learning algorithms
 # ----------------------------------------------------------------
-# To configure an active learning algorithm, we must define its core components: the selected simulation algorithm instantiation, the Gaussian Process fitter, and the active learning criterion
+# To set an active learning algorithm, we must define its core components: the selected simulation algorithm instantiation, the Gaussian Process fitter, and the active learning criterion.
 
 # %%
 # Definition of Gaussian Process fitter
@@ -115,7 +118,8 @@ event = ot.ThresholdEvent(Y, ot.Less(), threshold)
 
 # %%
 # Creation of DoE with a limited size (number_samples_DoE = 10) and evaluation of the exact limit state function.
-# The definition domain for the DoE (through the lower and upper bounds) is extended in order to get samples in rare event regions. It can be also defined by a combination of mean and standard deviation of the input distribution (for example, :math:`\mu \pm 4 \sigma`)
+# The definition domain for the DoE (through the lower and upper bounds) is extended in order to get samples in rare event regions.
+# It can be also defined by a combination of mean and standard deviation of the input distribution (for example, :math:`\mu \pm 4 \sigma`).
 
 # %%
 lower_bound_DoE = -5.0
@@ -141,7 +145,9 @@ fitter = ot.GaussianProcessFitter(input_DoE, output_DoE, covariance_model, basis
 # ------------------------------------------------------------------------------------
 
 # %%
-# Definition of Monte-Carlo algorithm. The settings of the Monte-Carlo algorithm can have a large impact on the results of the active learning algorithm. These settings should be carefully chosen.
+# Definition of Monte-Carlo algorithm.
+# The settings of the Monte-Carlo algorithm can have a large impact on the results of the active learning algorithm.
+# These settings should be carefully chosen.
 Monte_Carlo_experiment = ot.MonteCarloExperiment()
 Monte_Carlo_algorithm = ot.ProbabilitySimulationAlgorithm(event, Monte_Carlo_experiment)
 Monte_Carlo_algorithm.setMaximumCoefficientOfVariation(0.01)
@@ -149,7 +155,7 @@ Monte_Carlo_algorithm.setMaximumOuterSampling(5000)
 
 # %%
 # Definition of active learning function. Here, we choose the "U" function. This function takes two arguments. The first one is the event threshold.
-# The second one defines is used to assess the convergence of active learning when the Convergence Criterion of :class:`~openturns.ActiveLearningReliabilityAlgorithm` is set to `ACTIVE_LEARNING`.
+# The second one is used to assess the convergence of active learning if the Convergence Criterion of :class:`~openturns.ActiveLearningReliabilityAlgorithm` is set to `ACTIVE_LEARNING`.
 # Here, we choose that the algorithm will stop if the "U" function evaluations for all the samples of the simulation algorithm are greater than 2.
 active_learning_convergence_threshold = 2.0
 u_function = ot.ActiveLearningUFunction(
@@ -164,7 +170,8 @@ active_learning_MonteCarlo = ot.ActiveLearningReliabilityAlgorithm(
 )
 
 # %%
-# We need to select the stopping criterion of active learning algorithm. Here we choose to use a criterion based on the active learning function (with the settings given at the :class:`~openturns.ActiveLearningUFunction` instanciation).
+# We need to select the stopping criterion of active learning algorithm.
+# Here we choose to use a criterion based on the active learning function (with the settings given at the :class:`~openturns.ActiveLearningUFunction` instanciation).
 convergence_criterion = active_learning_MonteCarlo.ACTIVE_LEARNING
 active_learning_MonteCarlo.setConvergenceCriterion(convergence_criterion)
 
