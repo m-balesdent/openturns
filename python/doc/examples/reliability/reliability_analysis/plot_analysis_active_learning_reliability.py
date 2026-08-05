@@ -23,7 +23,7 @@ Analysis of active learning algorithms for reliability estimation
 #
 # We use the :class:`~openturns.ProbabilitySimulationAlgorithm` using :class:`~openturns.MonteCarloExperiment` as the simulation algorithm.
 # For active learning, this algorithm is combined with :class:`~openturns.ActiveLearningUFunction`.
-# We propose to compare the two approaches (without and with active learning) with a global simulation budget of 40 samples.
+# We propose to compare the two approaches (without and with active learning) with a global simulation budget of 40 samples. 
 # For the active learning, 10 samples will be used to generate a first Design of Experiments and 30 other samples will be added using active learning.
 
 # %%
@@ -57,13 +57,11 @@ def ackley(X):
     c = 0.5 * m.pi
     d = len(X)
     sumOfSquared = sum(x**2 for x in X) / d
-    sumOfCos = sum(m.cos(c * x) for x in X) / d
+    sumOfCos = sum(m.cos(c * x ) for x in X) / d
     f = -a * m.exp(-b * m.sqrt(sumOfSquared)) - m.exp(sumOfCos) + a + m.exp(1.0)
     return [f]
-
-
-g = ot.PythonFunction(2, 1, ackley)
-
+g = ot.PythonFunction(2,1,ackley)
+    
 # %%
 # Draw the function :math:`g` to understand the shape of the limit state function:
 
@@ -107,10 +105,7 @@ result_Monte_Carlo = Monte_Carlo.getResult()
 
 # %%
 # Display the probability estimate
-print(
-    "Probability estimate true function learning:",
-    result_Monte_Carlo.getProbabilityEstimate(),
-)
+print("Probability estimate true function learning:", result_Monte_Carlo.getProbabilityEstimate())
 
 # %%
 # Definition of Design of Experiments
@@ -128,7 +123,7 @@ lhs = ot.LHSExperiment(distribution_LHS, number_samples_DoE_complete)
 input_DoE_complete = lhs.generate()
 output_DoE_complete = g(input_DoE_complete)
 
-indices = ot.Indices(range(0, 10))
+indices = ot.Indices(range(0,10))
 input_DoE_reduced = input_DoE_complete.select(indices)
 output_DoE_reduced = output_DoE_complete.select(indices)
 
@@ -142,9 +137,7 @@ output_DoE_reduced = output_DoE_complete.select(indices)
 # %%
 basis = ot.ConstantBasisFactory(input_dimension).build()
 covariance_model = ot.MaternModel(input_dimension)
-fitter_algo = ot.GaussianProcessFitter(
-    input_DoE_complete, output_DoE_complete, covariance_model, basis
-)
+fitter_algo = ot.GaussianProcessFitter(input_DoE_complete, output_DoE_complete, covariance_model, basis)
 fitter_algo.run()
 fitter_result = fitter_algo.getResult()
 gpr_algo = ot.GaussianProcessRegression(fitter_result)
@@ -153,16 +146,14 @@ gpr_result = gpr_algo.getResult()
 gprMetamodel = gpr_result.getMetaModel()
 Y_metamodel = ot.CompositeRandomVector(gprMetamodel, X)
 
-# %%
-# Setting the reliability problem
+# %% 
+# Setting the reliability problem 
 event_metamodel = ot.ThresholdEvent(Y_metamodel, ot.Greater(), threshold)
 
 # %%
 # Run of Monte-Carlo algorithm on the metamodel
 ot.RandomGenerator.SetSeed(0)
-Monte_Carlo_metamodel = ot.ProbabilitySimulationAlgorithm(
-    event_metamodel, Monte_Carlo_experiment
-)
+Monte_Carlo_metamodel = ot.ProbabilitySimulationAlgorithm(event_metamodel, Monte_Carlo_experiment)
 Monte_Carlo_metamodel.setMaximumCoefficientOfVariation(0.01)
 Monte_Carlo_metamodel.setMaximumOuterSampling(10000)
 Monte_Carlo_metamodel.run()
@@ -170,10 +161,7 @@ result_Monte_Carlo_metamodel = Monte_Carlo_metamodel.getResult()
 
 # %%
 # Display the probability estimate
-print(
-    "Probability estimate without learning:",
-    result_Monte_Carlo_metamodel.getProbabilityEstimate(),
-)
+print("Probability estimate without learning:", result_Monte_Carlo_metamodel.getProbabilityEstimate())
 
 # %%
 # Monte-Carlo simulation and active learning
@@ -192,16 +180,12 @@ gmm_function = ot.ActiveLearningGMMFunction(
 )
 # %%
 # Definition of the Gaussian process fitter on the reduced DoE
-fitter_algo_reduced = ot.GaussianProcessFitter(
-    input_DoE_reduced, output_DoE_reduced, covariance_model, basis
-)
+fitter_algo_reduced = ot.GaussianProcessFitter(input_DoE_reduced, output_DoE_reduced, covariance_model, basis)
 fitter_algo_reduced.run()
 
 # %%
 # Now, we can build the active learning algorithm. We define the maximal number of exact limit state function evaluations to 20.
-Monte_Carlo_active_learning = ot.ProbabilitySimulationAlgorithm(
-    event, Monte_Carlo_experiment
-)
+Monte_Carlo_active_learning = ot.ProbabilitySimulationAlgorithm(event, Monte_Carlo_experiment)
 Monte_Carlo_active_learning.setMaximumCoefficientOfVariation(0.01)
 Monte_Carlo_active_learning.setMaximumOuterSampling(10000)
 simulation_budget = 30
@@ -221,24 +205,21 @@ metamodel_active_learning = gprResult.getMetaModel()
 
 # %%
 # Probability estimate
-print(
-    "Probability estimate with active learning:",
-    results_active_MonteCarlo.getProbabilityEstimate(),
-)
+print("Probability estimate with active learning:", results_active_MonteCarlo.getProbabilityEstimate())
 
 # %%
 # As we can see, the value of the probabilities are very different.
 # To understand the behavior of the algorithms, we can plot the shape of the metamodel.
-drawfunction.setTitle("True function")
+drawfunction.setTitle('True function')
 drawfunction_static_metamodel = gprMetamodel.draw(
     [-5] * input_dimension, [5] * input_dimension, [100] * input_dimension
 )
-drawfunction_static_metamodel.setTitle("Static metamodel")
+drawfunction_static_metamodel.setTitle('Static metamodel')
 
 drawfunction_active_metamodel = metamodel_active_learning.draw(
     [-5] * input_dimension, [5] * input_dimension, [100] * input_dimension
 )
-drawfunction_active_metamodel.setTitle("Active learning metamodel")
+drawfunction_active_metamodel.setTitle('Active learning metamodel')
 
 grid = ot.GridLayout(1, 3)
 grid.setGraph(0, 0, drawfunction)
@@ -249,7 +230,7 @@ _ = otv.View(grid)
 
 # %%
 # Even if the metamodel by active learning does not fit well the function elsewhere, we can plot the limit state approximated by the metamodel and compare with true function.
-# On this graph, we can see the metamodel refined by active learning is much more precise than the static one in the vicinity of the limit state.
+# On this graph, we can see the metamodel refined by active learning is much more precise than the static one in the vicinity of the limit state.
 # This graphs also shows the PDF of the input variables.
 graph = ot.Graph("Limit states", "x1", "x2")
 g_IsoLines = g.draw(
@@ -292,7 +273,7 @@ graph.setLegendPosition("upper left")
 _ = otv.View(graph)
 
 # %%
-# We can also visualize the input samples generated by the Monte Carlo algorithm.
+# We can also visualize the input samples generated by the Monte Carlo algorithm.
 graph = ot.Graph("Limit states", "x1", "x2")
 dr_metamodel_active.setLineWidth(1)
 cloud = ot.Cloud(Monte_Carlo.getInputSample())
