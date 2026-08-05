@@ -171,7 +171,7 @@ active_learning_MonteCarlo = ot.ActiveLearningReliabilityAlgorithm(
 
 # %%
 # We need to select the stopping criterion of active learning algorithm.
-# Here we choose to use a criterion based on the active learning function (with the settings given at the :class:`~openturns.ActiveLearningUFunction` instanciation).
+# Here we choose to use a criterion based on the active learning function (with the settings given at the :class:`~openturns.ActiveLearningUFunction` instantiation).
 convergence_criterion = active_learning_MonteCarlo.ACTIVE_LEARNING
 active_learning_MonteCarlo.setConvergenceCriterion(convergence_criterion)
 
