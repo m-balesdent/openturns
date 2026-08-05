@@ -23,7 +23,7 @@ Analysis of active learning algorithms for reliability estimation
 #
 # We use the :class:`~openturns.ProbabilitySimulationAlgorithm` using :class:`~openturns.MonteCarloExperiment` as the simulation algorithm.
 # For active learning, this algorithm is combined with :class:`~openturns.ActiveLearningUFunction`.
-# We propose to compare the two approaches (without and with active learning) with a global simulation budget of 40 samples. 
+# We propose to compare the two approaches (without and with active learning) with a global simulation budget of 40 samples.
 # For the active learning, 10 samples will be used to generate a first Design of Experiments and 30 other samples will be added using active learning.
 
 # %%
@@ -31,7 +31,6 @@ Analysis of active learning algorithms for reliability estimation
 
 # %%
 import openturns as ot
-from openturns.usecases import ackley_function
 import openturns.viewer as otv
 import math as m
 
@@ -51,17 +50,21 @@ input_dimension = input_distribution.getDimension()
 # Create the function :math:`g` from the Ackley model:
 
 # %%
+
+
 def ackley(X):
     a = 20.0
     b = 0.02
     c = 0.5 * m.pi
     d = len(X)
-    sumOfSquared = sum(x**2 for x in X) / d
-    sumOfCos = sum(m.cos(c * x ) for x in X) / d
+    sumOfSquared = sum(x ** 2 for x in X) / d
+    sumOfCos = sum(m.cos(c * x) for x in X) / d
     f = -a * m.exp(-b * m.sqrt(sumOfSquared)) - m.exp(sumOfCos) + a + m.exp(1.0)
     return [f]
-g = ot.PythonFunction(2,1,ackley)
-    
+
+
+g = ot.PythonFunction(2, 1, ackley)
+
 # %%
 # Draw the function :math:`g` to understand the shape of the limit state function:
 
@@ -110,7 +113,7 @@ print("Probability estimate true function learning:", result_Monte_Carlo.getProb
 # %%
 # Definition of Design of Experiments
 # -----------------------------------
-# We generate a Design of Experiments of 40 samples for the simulation algorithm using the overall metamodel and we extract a Design of Experiments of 20 samples for active learning reliability.
+# We generate a Design of Experiments of 40 samples for the simulation algorithm using the overall metamodel and we extract 10 samples for active learning reliability.
 
 # %%
 lower_bound_DoE = -5.0
@@ -123,7 +126,7 @@ lhs = ot.LHSExperiment(distribution_LHS, number_samples_DoE_complete)
 input_DoE_complete = lhs.generate()
 output_DoE_complete = g(input_DoE_complete)
 
-indices = ot.Indices(range(0,10))
+indices = ot.Indices(range(0, 10))
 input_DoE_reduced = input_DoE_complete.select(indices)
 output_DoE_reduced = output_DoE_complete.select(indices)
 
@@ -146,8 +149,8 @@ gpr_result = gpr_algo.getResult()
 gprMetamodel = gpr_result.getMetaModel()
 Y_metamodel = ot.CompositeRandomVector(gprMetamodel, X)
 
-# %% 
-# Setting the reliability problem 
+# %%
+# Setting the reliability problem
 event_metamodel = ot.ThresholdEvent(Y_metamodel, ot.Greater(), threshold)
 
 # %%
@@ -231,7 +234,7 @@ _ = otv.View(grid)
 # %%
 # Even if the metamodel by active learning does not fit well the function elsewhere, we can plot the limit state approximated by the metamodel and compare with true function.
 # On this graph, we can see the metamodel refined by active learning is much more precise than the static one in the vicinity of the limit state.
-# This graphs also shows the PDF of the input variables.
+# This graph also shows the PDF of the input variables.
 graph = ot.Graph("Limit states", "x1", "x2")
 g_IsoLines = g.draw(
     [-5] * input_dimension, [5] * input_dimension, [128] * input_dimension
