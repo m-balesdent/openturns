@@ -5,9 +5,10 @@ Active learning algorithms for reliability analysis
 
 # %%
 #
-# The objective is to illustrate the behavior of active learning algorithms. These algorithms couple
+# The objective is to illustrate the behavior of active learning algorithms in the context of reliability analysis. These algorithms couple
 # a simulation algorithm (e.g., Monte-Carlo simulation, Importance Sampling, Subset Sampling), a Gaussian Process
-# and an active learning Untitled2criterion to enrich the metamodel.
+# and an active learning criterion to enrich the metamodel in a goal-oriented approach to efficiently estimate a probability of failure. For more details, please consult :class:`~openturns.ActiveLearningReliabilityAlgorithm`.
+# In this example, two cases are described. Firstly, :class:`~openturns.ProbabilitySimulationAlgorithm` using :class:`~openturns.MonteCarloExperiment` is combined with :class:`~openturns.ActiveLearningUFunction` as active learning criterion. Secondly, :class:`~openturns.SubsetSampling` is associated with :class:`~openturns.ActiveLearningGMMFunction`.
 #
 # We consider the four-branch function :math:`g : \mathbb{R}^2 \rightarrow \mathbb{R}` defined by:
 #
@@ -20,7 +21,7 @@ Active learning algorithms for reliability analysis
 #   \end{pmatrix}
 #   \end{align*}
 #
-# and the input random vector :math:`\vect{X} = (X_1, X_2)` which follows the standard 2-dimensional Normal distribution:
+# and the input random vector :math:`\vect{X} = (X_1, X_2)` which follows the 2-dimensional Normal distribution:
 #
 # .. math::
 #   \begin{align*}
@@ -53,6 +54,7 @@ import math
 # %%
 input_distribution = ot.Normal([0.0, 0.0], [1.5, 1.5])
 X = ot.RandomVector(input_distribution)
+input_dimension = input_distribution.getDimension()
 
 # %%
 # Create the function :math:`g` from a :class:`~openturns.PythonFunction`:
@@ -72,17 +74,19 @@ def fourBranch(x):
     return [min((g1, g2, g3, g4))]
 
 
-g = ot.PythonFunction(2, 1, fourBranch)
+g = ot.PythonFunction(input_dimension, 1, fourBranch)
 
 # %%
-# Draw the function :math:`g` to help to understand the shape of the limit state function:
+# Draw the function :math:`g` to understand the shape of the limit state function:
 
 # %%
 graph = ot.Graph("Four Branch function", "x1", "x2")
 graph.setAxes(True)
 graph.setGrid(True)
 graph.setLegendPosition("upper right")
-drawfunction = g.draw([-5] * 2, [5] * 2, [100] * 2)
+drawfunction = g.draw(
+    [-5] * input_dimension, [5] * input_dimension, [100] * input_dimension
+)
 graph.add(drawfunction)
 view = otv.View(graph)
 
@@ -103,20 +107,22 @@ event = ot.ThresholdEvent(Y, ot.Less(), threshold)
 # %%
 # Evaluate the probability with various active learning algorithms
 # ----------------------------------------------------------------
-# In order to specify an active learning algorithm, we need to build the main ingredients of such an algorithm:
-# the instantiated simulation algorithm we want to use, the Gaussian Process fitter, and the active learning criterion.
+# To configure an active learning algorithm, we must define its core components: the selected simulation algorithm instantiation, the Gaussian Process fitter, and the active learning criterion
 
 # %%
 # Definition of Gaussian Process fitter
 # -------------------------------------
 
 # %%
-# Creation of DoE
+# Creation of DoE with a limited size (number_samples_DoE = 10) and evaluation of the exact limit state function.
+# The definition domain for the DoE (through the lower and upper bounds) is extended in order to get samples in rare event regions. It can be also defined by a combination of mean and standard deviation of the input distribution (for example, :math:`\mu \pm 4 \sigma`)
+
+# %%
 lower_bound_DoE = -5.0
 upper_bound_DoE = 5.0
 number_samples_DoE = 10
 distribution_LHS = ot.JointDistribution(
-    [ot.Uniform(lower_bound_DoE, upper_bound_DoE)] * 2
+    [ot.Uniform(lower_bound_DoE, upper_bound_DoE)] * input_dimension
 )
 lhs = ot.LHSExperiment(distribution_LHS, number_samples_DoE)
 input_DoE = lhs.generate()
@@ -124,8 +130,10 @@ output_DoE = g(input_DoE)
 
 # %%
 # Creation of Gaussian Process Fitter
-basis = ot.ConstantBasisFactory(2).build()
-covariance_model = ot.MaternModel(2)
+
+# %%
+basis = ot.ConstantBasisFactory(input_dimension).build()
+covariance_model = ot.MaternModel(input_dimension)
 fitter = ot.GaussianProcessFitter(input_DoE, output_DoE, covariance_model, basis)
 
 # %%
@@ -133,51 +141,61 @@ fitter = ot.GaussianProcessFitter(input_DoE, output_DoE, covariance_model, basis
 # ------------------------------------------------------------------------------------
 
 # %%
-# Definition of Monte-Carlo algorithm
+# Definition of Monte-Carlo algorithm. The settings of the Monte-Carlo algorithm can have a large impact on the results of the active learning algorithm. These settings should be carefully chosen.
 Monte_Carlo_experiment = ot.MonteCarloExperiment()
 Monte_Carlo_algorithm = ot.ProbabilitySimulationAlgorithm(event, Monte_Carlo_experiment)
 Monte_Carlo_algorithm.setMaximumCoefficientOfVariation(0.01)
 Monte_Carlo_algorithm.setMaximumOuterSampling(5000)
 
 # %%
-# Definition of active learning function. Here, we choose the "U" function
+# Definition of active learning function. Here, we choose the "U" function. This function takes two arguments. The first one is the event threshold.
+# The second one defines is used to assess the convergence of active learning when the Convergence Criterion of :class:`~openturns.ActiveLearningReliabilityAlgorithm` is set to `ACTIVE_LEARNING`.
+# Here, we choose that the algorithm will stop if the "U" function evaluations for all the samples of the simulation algorithm are greater than 2.
 active_learning_convergence_threshold = 2.0
 u_function = ot.ActiveLearningUFunction(
-    threshold, active_learning_convergence_threshold
+    event.getThreshold(), active_learning_convergence_threshold
 )
 
 # %%
-# Now, we can build the active learning algorithm
+# Now, we can build the active learning algorithm. We define the maximal number of exact limit state function evaluations to 75.
 simulation_budget = 75
 active_learning_MonteCarlo = ot.ActiveLearningReliabilityAlgorithm(
     fitter, Monte_Carlo_algorithm, u_function, simulation_budget
 )
 
 # %%
-# We need to define the stopping criterion of active learning algorithm. Here we choose to use a criterion based on the active learning function.
+# We need to select the stopping criterion of active learning algorithm. Here we choose to use a criterion based on the active learning function (with the settings given at the :class:`~openturns.ActiveLearningUFunction` instanciation).
 convergence_criterion = active_learning_MonteCarlo.ACTIVE_LEARNING
 active_learning_MonteCarlo.setConvergenceCriterion(convergence_criterion)
 
 # %%
-# Now we can run the algorithm and get results
+# Now, we can run the algorithm and get results
 active_learning_MonteCarlo.run()
 results_active_MonteCarlo = active_learning_MonteCarlo.getResult()
 
-# %% Probability estimate
+# %%
+# Probability estimate
 print("Probability estimate:", results_active_MonteCarlo.getProbabilityEstimate())
 
-# %% Confidence interval of probability estimation due to Gaussian Process uncertainty
+# %%
+# Confidence interval of probability estimation due to Gaussian Process uncertainty
 print(
     "Confidence interval:", results_active_MonteCarlo.getProbabilityConfidenceInterval()
 )
 
-# %% Number of function calls during active learning process
+# %%
+# Number of function calls during active learning process
 print(
     "Number of function calls during active learning:",
     results_active_MonteCarlo.getFunctionCallNumber(),
 )
 
-# %% Visualization of infill samples. We can draw the metamodel of the function and final DoE
+# %%
+# Visualization of infill samples. We can draw the metamodel of the function and final DoE.
+# We use the Gaussian process regressor refined with the active learning algorithm. We plot both the initial and enriched DoEs.
+# We also plot the contours of the limit state approximation with the metamodel.
+
+# %%
 gprResult = results_active_MonteCarlo.getGprResult()
 metamodel = gprResult.getMetaModel()
 final_input_DoE = results_active_MonteCarlo.getGprResult().getInputSample()
@@ -186,8 +204,12 @@ graph = ot.Graph("Final Gaussian Process metamodel", "x1", "x2")
 graph.setAxes(True)
 graph.setGrid(True)
 graph.setLegendPosition("upper right")
-drawfunction = metamodel.draw([-5] * 2, [5] * 2, [100] * 2)
+drawfunction = metamodel.draw(
+    [-5] * input_dimension, [5] * input_dimension, [100] * input_dimension
+)
 drawfunction.setTitle("Metamodel after active learning")
+drawfunction.setXTitle("x1")
+drawfunction.setYTitle("x2")
 cloud1 = ot.Cloud(final_input_DoE, "final DoE")
 cloud2 = ot.Cloud(input_DoE, "initial DoE")
 graph.add(drawfunction)
@@ -196,21 +218,30 @@ graph.add(cloud2)
 view = otv.View(graph)
 # sphinx_gallery_thumbnail_number = 2
 
-# %% We can compare the metamodel before and after refinement.
+# %%
+# We can see that as the active learning is goal-oriented, the metamodel is accurate only in the vicinity of the event threshold.
+
+# %%
+# We can compare the metamodel before and after refinement.
 fitter.run()
 gpr_initial = ot.GaussianProcessRegression(fitter.getResult())
 gpr_initial.run()
 metamodel_initial = gpr_initial.getResult().getMetaModel()
 
-drawfunction_initial = metamodel_initial.draw([-5] * 2, [5] * 2, [100] * 2)
+drawfunction_initial = metamodel_initial.draw(
+    [-5] * input_dimension, [5] * input_dimension, [100] * input_dimension
+)
 drawfunction_initial.setTitle("Metamodel before active learning")
+drawfunction_initial.setXTitle("x1")
+drawfunction_initial.setYTitle("x2")
 grid = ot.GridLayout(1, 2)
 grid.setGraph(0, 1, drawfunction)
 grid.setGraph(0, 0, drawfunction_initial)
 _ = otv.View(grid)
 
 
-# %% We can  plot the probability history along the active learning process iterations.
+# %%
+# We can  plot the probability history along the active learning process iterations.
 graph_history = ot.Graph("Probability history", "iterations", "Probability estimate")
 graph_history.setGrid(True)
 probability_history = results_active_MonteCarlo.getProbabilityHistory()
@@ -218,16 +249,21 @@ size_history = len(probability_history)
 graph_history.add(ot.Curve(range(size_history), probability_history))
 _ = otv.View(graph_history)
 
-# %% We can also plot the limit state provided by the true function and compare with the one estimated by the refined metamodel.
+# %%
+# We can also plot the limit state provided by the true function and compare with the one estimated by the refined metamodel.
 graph = ot.Graph("Limit states", "x1", "x2")
-g_IsoLines = g.draw([-5] * 2, [5] * 2, [128] * 2)
+g_IsoLines = g.draw(
+    [-5] * input_dimension, [5] * input_dimension, [128] * input_dimension
+)
 dr = g_IsoLines.getDrawable(0)
 dr.setLevels([threshold])
 dr.setLegend("Limit state - true function")
 dr.setColor("blue")
 dr.setLineWidth(1)
 
-metamodel_initial_IsoLines = metamodel_initial.draw([-5] * 2, [5] * 2, [128] * 2)
+metamodel_initial_IsoLines = metamodel_initial.draw(
+    [-5] * input_dimension, [5] * input_dimension, [128] * input_dimension
+)
 dr_metamodel_initial = metamodel_initial_IsoLines.getDrawable(0)
 dr_metamodel_initial.setLevels([threshold])
 dr_metamodel_initial.setLineStyle("dashed")
@@ -235,7 +271,9 @@ dr_metamodel_initial.setLegend("Limit state - metamodel before active learning")
 dr_metamodel_initial.setColor("orange")
 dr_metamodel_initial.setLineWidth(1)
 
-metamodel_IsoLines = metamodel.draw([-5] * 2, [5] * 2, [128] * 2)
+metamodel_IsoLines = metamodel.draw(
+    [-5] * input_dimension, [5] * input_dimension, [128] * input_dimension
+)
 dr_metamodel = metamodel_IsoLines.getDrawable(0)
 dr_metamodel.setLevels([threshold])
 dr_metamodel.setLineStyle("dashed")
@@ -261,7 +299,6 @@ _ = otv.View(graph)
 # Definition of Subset sampling with default parameters
 subset_algorithm = ot.SubsetSampling(event)
 
-subset_algorithm.run()
 # %%
 # Definition of active learning function. Here, we choose the "generalized max min" function
 active_learning_convergence_threshold = 1e-10
@@ -302,16 +339,24 @@ active_learning_subset.setConvergenceCriterion(convergence_criterion)
 active_learning_subset.run()
 results_active_subset = active_learning_subset.getResult()
 
-# %% Probability estimate
+# %%
+# Probability estimate
 print("Probability estimate:", results_active_subset.getProbabilityEstimate())
 
-# %% Confidence interval of probability estimation due to Gaussian Process uncertainty
+# %%
+# Confidence interval of probability estimation due to Gaussian Process uncertainty
 print("Confidence interval:", results_active_subset.getProbabilityConfidenceInterval())
 
-# %% Number of function calls
+# %%
+# Number of function calls
 print("Number of function calls:", results_active_subset.getFunctionCallNumber())
 
-# %% Visualization of infill samples.
+# %%
+# Visualization of infill samples.
+# We use the Gaussian process regressor refined with the active learning algorithm. We plot both the initial and enriched DoEs.
+# We also plot the contours of the limit state approximation with the metamodel.
+# We can see that the infilled samples using the GMM are more spread out that with the "U"-function.
+# This is due to the fact that the GMM function takes the distance between the currrent DoE samples into account.
 gprResult_subset = results_active_subset.getGprResult()
 
 metamodel_subset = gprResult_subset.getMetaModel()
@@ -321,7 +366,9 @@ graph = ot.Graph("Final Gaussian Process metamodels", "x1", "x2")
 graph.setAxes(True)
 graph.setGrid(True)
 graph.setLegendPosition("upper right")
-drawfunction = metamodel_subset.draw([-5] * 2, [5] * 2, [100] * 2)
+drawfunction = metamodel_subset.draw(
+    [-5] * input_dimension, [5] * input_dimension, [100] * input_dimension
+)
 cloud1 = ot.Cloud(final_input_DoE_subset, "final DoE")
 cloud2 = ot.Cloud(input_DoE, "initial DoE")
 graph.add(drawfunction)
@@ -330,13 +377,16 @@ graph.add(cloud2)
 view = otv.View(graph)
 otv.View.ShowAll()
 
-# %% We can also plot the limit state provided by the true function and compare with the one estimated by the new refined metamodel.
+# %%
+# We can also plot the limit state provided by the true function and compare with the one estimated by the new refined metamodel.
 graph = ot.Graph("Limit states", "x1", "x2")
 levels = [0.0]
 graph.add(dr)
 graph.add(dr_metamodel_initial)
 graph.add(dr_metamodel)
-metamodel_IsoLines_subset = metamodel_subset.draw([-5] * 2, [5] * 2, [128] * 2)
+metamodel_IsoLines_subset = metamodel_subset.draw(
+    [-5] * input_dimension, [5] * input_dimension, [128] * input_dimension
+)
 dr_metamodel_subset = metamodel_IsoLines_subset.getDrawable(0)
 dr_metamodel_subset.setLevels([threshold])
 dr_metamodel_subset.setLineStyle("dashed")
