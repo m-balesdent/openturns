@@ -38,7 +38,7 @@ Let consider the following reliability analysis problem to solve:
 The failure condition can also be :math:`\model(\inputRV)\geq T`.
 
 The probability of failure can be defined as follows : 
-:math:`P_f = \Prob{\model(\inputRV)\leq T]=   \int_{D_f}  f_\inputRV(\mathbf{x}) d\mathbf{x}`
+:math:`P_f = \Prob{\model(\inputRV)\leq T}=   \int_{D_f}  f_\inputRV(\mathbf{x}) d\mathbf{x}`
 
 This probability can also be written as : 
 :math:`P_f = \int_{\mathbb{R}^{\inputDim}}  \mathbf{1}_{ \left\{ \model(\inputRV) \leq T \right\} }f_\inputRV(\mathbf{x}) d\mathbf{x}`
