@@ -51,26 +51,6 @@ ActiveLearningReliabilityAlgorithm::ActiveLearningReliabilityAlgorithm()
   {
     // Nothing to do
   }
-
-/** Default constructor */  
-/*ActiveLearningReliabilityAlgorithm::ActiveLearningReliabilityAlgorithm (const GaussianProcessFitter & gpFitter,
-                                                                        const EventSimulation & reliabilityAlgorithm)
-  : EventSimulation(reliabilityAlgorithm.getEvent().getImplementation()->asComposedEvent())
-  , defaultEvent_(reliabilityAlgorithm.getEvent().getImplementation()->asComposedEvent())
-  , inputDoE_(gpFitter.getInputSample())
-  , outputDoE_(gpFitter.getOutputSample())
-  , defaultGPFitter_(gpFitter)ActiveLearningFunction
-  {
-  
-    
-    defaultSimulationAlgorithm_ = new EventSimulation(reliabilityAlgorithm);
-    currentSimulationAlgorithm_ = new EventSimulation(reliabilityAlgorithm);
-    //SimulationResult simResults(reliabilityAlgorithm.getResult());
-    currentProbabilitySimulationResult_ = new SimulationResult;//(simResults);
-    std::cout<<" Type de l'algo au constructeur, event simulation"<<std::endl;
-    std::cout<<*currentSimulationAlgorithm_<<std::endl;
-  }*/
-  
   
 /** Constructor with NAIS */  
 ActiveLearningReliabilityAlgorithm::ActiveLearningReliabilityAlgorithm (const GaussianProcessFitter & gpFitter,

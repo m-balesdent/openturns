@@ -24,7 +24,7 @@ Let consider :math:`\vect{X}_i` a sample selected for infill criterion evaluatio
 .. math::
    :nowrap:
    
-   GMM(\vect{X}_i)=`f_{\inputRV}(\vect{X}_i)^{1/d} \min_{j=1,...,n} \|\inputRV_i - \vect{X}_{{DOE}_j}\|
+   GMM(\vect{X}_i)=f_{\inputRV}(\vect{X}_i)^{1/d} \min_{j=1,...,n} \|\inputRV_i - \vect{X}_{{DOE}_j}\|
 
 The sample that maximizes the GMM criterion will be selected for infill.
 )RAW"

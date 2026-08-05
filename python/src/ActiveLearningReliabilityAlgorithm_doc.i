@@ -35,7 +35,7 @@ Let consider the following reliability analysis problem to solve:
 :math:`\inputRV` is the input random vector of dimension :math:`\inputDim`, :math:`f_\inputRV (\mathbf{x})`  its joint density probability function. :math:`\model(\cdot)` is the limit state function of the model. 
 :math:`D_f = \{\inputRV \in \mathbb{R}^\inputDim \, \vert \, \model(\inputRV,\mathbf{d}) \leq T\}` is the domain definition of the event to consider (failure). :math:`\model(\cdot) = T` is called the limit state.
 
-The failure condition can also be :math:`\model(\inputRV)\geq T`.
+The failure condition can also be :math:`\model(\inputRV)\geq T`, see :class:`~openturns.ThresholdEvent`.
 
 The probability of failure can be defined as follows : 
 :math:`P_f = \Prob{\model(\inputRV)\leq T}=   \int_{D_f}  f_\inputRV(\mathbf{x}) d\mathbf{x}`

@@ -152,8 +152,6 @@ protected:
 
   ActiveLearningReliabilityResult activeLearningReliabilityResult_;
 
-private :
-
   /** Maximum sample size accessor */
   void setMaximumOuterSampling(const UnsignedInteger maximumOuterSampling);
   UnsignedInteger getMaximumOuterSampling() const;
