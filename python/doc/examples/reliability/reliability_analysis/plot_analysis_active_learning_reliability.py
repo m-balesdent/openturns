@@ -6,7 +6,7 @@ Analysis of active learning algorithms for reliability estimation
 # %%
 #
 # The objective is to analyze the behavior of reliability algorithms with and without active learning.
-# To do so, we propose to set up a probability simulation problem using a smooth version of the  `Ackley` function defined in :ref:`use-case-ackley` page.
+# To do so, we propose to set up a probability simulation problem using a modified version of the  `Ackley` function defined in :ref:`use-case-ackley` page.
 # We consider the input random vector :math:`\vect{X} = (X_1, X_2)` which follows the 2-dimensional Normal distribution:
 #
 # .. math::
@@ -24,13 +24,14 @@ Analysis of active learning algorithms for reliability estimation
 # We use the :class:`~openturns.ProbabilitySimulationAlgorithm` using :class:`~openturns.MonteCarloExperiment` as the simulation algorithm.
 # For active learning, this algorithm is combined with :class:`~openturns.ActiveLearningUFunction`.
 # We propose to compare the two approaches (without and with active learning) with a global simulation budget of 40 samples.
-# For the active learning, 6 samples will be used to generate a first Design of Experiments and 34 other samples will be added using active learning.
+# For the active learning, 10 samples will be used to generate a first Design of Experiments and 30 other samples will be added using active learning.
 
 # %%
 # First, import the python modules:
 
 # %%
 import openturns as ot
+from openturns.usecases import ackley_function
 import openturns.viewer as otv
 import math as m
 
@@ -50,17 +51,14 @@ input_dimension = input_distribution.getDimension()
 # Create the function :math:`g` from the Ackley model:
 
 # %%
-
-
 def ackley(X):
     a = 20.0
-    b = 0.2
-    c = 1.0 * m.pi
+    b = 0.02
+    c = 0.5 * m.pi
     d = len(X)
     sumOfSquared = sum(x**2 for x in X) / d
     sumOfCos = sum(m.cos(c * x) for x in X) / d
     f = -a * m.exp(-b * m.sqrt(sumOfSquared)) - m.exp(sumOfCos) + a + m.exp(1.0)
-
     return [f]
 
 
@@ -87,11 +85,11 @@ view = otv.View(graph)
 Y = ot.CompositeRandomVector(g, X)
 
 # %%
-# Create the event :math:`\{ Y = g(\vect{X}) \geq 9 \}`
+# Create the event :math:`\{ Y = g(\vect{X}) \geq 10 \}`
 # -----------------------------------------------------
 
 # %%
-threshold = 9.0
+threshold = 3.0
 event = ot.ThresholdEvent(Y, ot.Greater(), threshold)
 
 # %%
@@ -103,6 +101,7 @@ Monte_Carlo_experiment = ot.MonteCarloExperiment()
 Monte_Carlo = ot.ProbabilitySimulationAlgorithm(event, Monte_Carlo_experiment)
 Monte_Carlo.setMaximumCoefficientOfVariation(0.01)
 Monte_Carlo.setMaximumOuterSampling(10000)
+Monte_Carlo.setKeepSample(True)
 Monte_Carlo.run()
 result_Monte_Carlo = Monte_Carlo.getResult()
 
@@ -116,7 +115,7 @@ print(
 # %%
 # Definition of Design of Experiments
 # -----------------------------------
-# We generate a Design of Experiments of 40 samples for the simulation algorithm using the overall metamodel and we extract a Design of Experiments of 6 samples for active learning.
+# We generate a Design of Experiments of 40 samples for the simulation algorithm using the overall metamodel and we extract a Design of Experiments of 20 samples for active learning reliability.
 
 # %%
 lower_bound_DoE = -5.0
@@ -129,7 +128,7 @@ lhs = ot.LHSExperiment(distribution_LHS, number_samples_DoE_complete)
 input_DoE_complete = lhs.generate()
 output_DoE_complete = g(input_DoE_complete)
 
-indices = ot.Indices(range(0, 6))
+indices = ot.Indices(range(0, 10))
 input_DoE_reduced = input_DoE_complete.select(indices)
 output_DoE_reduced = output_DoE_complete.select(indices)
 
@@ -182,13 +181,15 @@ print(
 # Now, we use the :class:`~openturns.ActiveLearningReliabilityAlgorithm` on the same reliability problem.
 
 # %%
-# Definition of active learning function. Here, we choose the "U" function.
-# Here, we choose that the algorithm will stop if the "U" function evaluations for all the samples of the simulation algorithm are greater than 2.
-active_learning_convergence_threshold = 2.0
-u_function = ot.ActiveLearningUFunction(
-    event.getThreshold(), active_learning_convergence_threshold
+# Definition of active learning function. Here, we choose the "GMM" function.
+active_learning_convergence_threshold = 1e-10
+gmm_output_quantile = 0.1
+gmm_function = ot.ActiveLearningGMMFunction(
+    threshold,
+    active_learning_convergence_threshold,
+    input_distribution,
+    gmm_output_quantile,
 )
-
 # %%
 # Definition of the Gaussian process fitter on the reduced DoE
 fitter_algo_reduced = ot.GaussianProcessFitter(
@@ -203,10 +204,10 @@ Monte_Carlo_active_learning = ot.ProbabilitySimulationAlgorithm(
 )
 Monte_Carlo_active_learning.setMaximumCoefficientOfVariation(0.01)
 Monte_Carlo_active_learning.setMaximumOuterSampling(10000)
-simulation_budget = 34
+simulation_budget = 30
 ot.RandomGenerator.SetSeed(0)
 active_learning_MonteCarlo = ot.ActiveLearningReliabilityAlgorithm(
-    fitter_algo_reduced, Monte_Carlo_active_learning, u_function, simulation_budget
+    fitter_algo_reduced, Monte_Carlo_active_learning, gmm_function, simulation_budget
 )
 convergence_criterion = active_learning_MonteCarlo.ACTIVE_LEARNING
 active_learning_MonteCarlo.setConvergenceCriterion(convergence_criterion)
@@ -221,7 +222,7 @@ metamodel_active_learning = gprResult.getMetaModel()
 # %%
 # Probability estimate
 print(
-    "Probability estimate active learning:",
+    "Probability estimate with active learning:",
     results_active_MonteCarlo.getProbabilityEstimate(),
 )
 
@@ -249,6 +250,7 @@ _ = otv.View(grid)
 # %%
 # Even if the metamodel by active learning does not fit well the function elsewhere, we can plot the limit state approximated by the metamodel and compare with true function.
 # On this graph, we can see the metamodel refined by active learning is much more precise than the static one in the vicinity of the limit state.
+# This graphs also shows the PDF of the input variables.
 graph = ot.Graph("Limit states", "x1", "x2")
 g_IsoLines = g.draw(
     [-5] * input_dimension, [5] * input_dimension, [128] * input_dimension
@@ -265,7 +267,7 @@ metamodel_initial_IsoLines = gprMetamodel.draw(
 dr_metamodel_initial = metamodel_initial_IsoLines.getDrawable(0)
 dr_metamodel_initial.setLevels([threshold])
 dr_metamodel_initial.setLineStyle("dashed")
-dr_metamodel_initial.setLegend("Limit state - metamodel before active learning")
+dr_metamodel_initial.setLegend("Limit state - metamodel without active learning")
 dr_metamodel_initial.setColor("orange")
 dr_metamodel_initial.setLineWidth(1)
 
@@ -278,10 +280,30 @@ dr_metamodel_active.setLineStyle("dashed")
 dr_metamodel_active.setLegend("Limit state - metamodel with active learning")
 dr_metamodel_active.setColor("black")
 dr_metamodel_active.setLineWidth(1)
-
 graph.add(dr)
 graph.add(dr_metamodel_initial)
 graph.add(dr_metamodel_active)
+draw_pdf = input_distribution.drawPDF()
+contour_pdf = draw_pdf.getDrawable(0).getImplementation()
+contour_pdf.setAlpha(0.3)
+graph.add(contour_pdf)
+graph.setLegendCorner([-0.05, -0.2])
+graph.setLegendPosition("upper left")
+_ = otv.View(graph)
+
+# %%
+# We can also visualize the input samples generated by the Monte Carlo algorithm.
+graph = ot.Graph("Limit states", "x1", "x2")
+dr_metamodel_active.setLineWidth(1)
+cloud = ot.Cloud(Monte_Carlo.getInputSample())
+graph.add(cloud)
+graph.add(dr)
+graph.add(dr_metamodel_initial)
+graph.add(dr_metamodel_active)
+draw_pdf = input_distribution.drawPDF()
+contour_pdf = draw_pdf.getDrawable(0).getImplementation()
+contour_pdf.setAlpha(0.3)
+graph.add(contour_pdf)
 graph.setLegendCorner([-0.05, -0.2])
 graph.setLegendPosition("upper left")
 _ = otv.View(graph)
