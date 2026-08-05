@@ -60,8 +60,9 @@ def ackley(X):
     sumOfSquared = sum(x**2 for x in X) / d
     sumOfCos = sum(m.cos(c * x) for x in X) / d
     f = -a * m.exp(-b * m.sqrt(sumOfSquared)) - m.exp(sumOfCos) + a + m.exp(1.0)
-    
+
     return [f]
+
 
 g = ot.PythonFunction(2, 1, ackley)
 
