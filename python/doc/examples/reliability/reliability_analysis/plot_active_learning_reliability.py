@@ -10,7 +10,7 @@ Active learning algorithms for reliability analysis
 # and an active learning criterion to enrich the metamodel in a goal-oriented approach to efficiently estimate a probability of failure.
 # For more details, please consult :class:`~openturns.ActiveLearningReliabilityAlgorithm`.
 # In this example, two cases are described.
-# Firstly, :class:`~openturns.ProbabilitySimulationAlgorithm` using :class:`~openturns.MonteCarloExperiment` is combined with :class:`~openturns.ActiveLearningUFunction` as active learning criterion.
+# Firstly, :class:`~openturns.ProbabilitySimulationAlgorithm` using :class:`~openturns.MonteCarloExperiment` is combined with :class:`~openturns.ActiveLearningUFunction`.
 # Secondly, :class:`~openturns.SubsetSampling` is associated with :class:`~openturns.ActiveLearningGMMFunction`.
 #
 # We consider the four-branch function :math:`g : \mathbb{R}^2 \rightarrow \mathbb{R}` defined by:
@@ -110,7 +110,7 @@ event = ot.ThresholdEvent(Y, ot.Less(), threshold)
 # %%
 # Evaluate the probability with various active learning algorithms
 # ----------------------------------------------------------------
-# To set an active learning algorithm, we must define its core components: the selected simulation algorithm instantiation, the Gaussian Process fitter, and the active learning criterion.
+# To set an active learning algorithm, we must define its core components: the selected simulation algorithm, the Gaussian Process fitter, and the active learning criterion.
 
 # %%
 # Definition of Gaussian Process fitter
