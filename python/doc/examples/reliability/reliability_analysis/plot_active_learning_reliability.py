@@ -334,6 +334,7 @@ active_learning_subset = ot.ActiveLearningReliabilityAlgorithm(
 #   \begin{align*}
 #   \frac{|\Prob{\hat{g}(\vect{X}) + k \hat{\sigma}(\vect{X})\leq 0} - \Prob{\hat{g}(\vect{X}) - k \hat{\sigma}(\vect{X})\leq 0}|}{\Prob{\hat{g}(\vect{X})\leq 0}} \leq \epsilon
 #   \end{align*}
+#
 # In this example, we choose :math:`k = 2` and :math:`\epsilon = 0.2`.
 convergence_criterion = active_learning_subset.PROBABILITY_UNCERTAINTY
 active_learning_subset.setConvergenceUncertaintyFactor(2.0)
